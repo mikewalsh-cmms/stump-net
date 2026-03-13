@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stumptown CMMS — Work Orders (TEST)</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #0e0f0f;
+    --bg2: #161717;
+    --bg3: #1e1f1f;
+    --bg4: #262727;
+    --border: #2a2b2b;
+    --text: #d1cdc7;
+    --text2: #8a8580;
+    --amber: #d4882a;
+    --amber-dim: rgba(212,136,42,0.15);
+    --amber-glow: rgba(212,136,42,0.3);
+    --red: #c0392b;
+    --red-dim: rgba(192,57,43,0.15);
+    --green: #27ae60;
+    --green-dim: rgba(39,174,96,0.15);
+    --blue: #2980b9;
+    --blue-dim: rgba(41,128,185,0.15);
+    --yellow: #f39c12;
+    --yellow-dim: rgba(243,156,18,0.15);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ===== TOPBAR ===== */
+  .topbar {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .topbar-left { display:flex; align-items:center; gap:16px; }
+
+  .topbar-brand {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--amber);
+    letter-spacing: 1px;
+  }
+
+  .topbar-badge {
+    background: var(--red);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+  }
+
+  .topbar-user { color: var(--text2); }
+  .topbar-role {
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-weight: 600;
+    font-size: 10px;
+    text-transform: uppercase;
+  }
+
+  .role-admin { background: var(--amber-dim); color: var(--amber); }
+  .role-tech { background: var(--bg3); color: var(--text2); }
+
+  .sync-dot { color: var(--green); }
+
+  /* ===== LAYOUT ===== */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  /* ===== HEADER ROW ===== */
+  .header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .header-row h2 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--amber);
+  }
+
+  /* ===== STAT CARDS ===== */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px;
+    text-align: center;
+  }
+
+  .stat-card .stat-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--amber);
+  }
+
+  .stat-card .stat-label {
+    font-size: 11px;
+    color: var(--text2);
+    font-family: 'IBM Plex Mono', monospace;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .stat-card.critical .stat-num { color: var(--red); }
+  .stat-card.pending .stat-num { color: var(--yellow); }
+  .stat-card.complete .stat-num { color: var(--green); }
+
+  /* ===== FILTERS ===== */
+  .filters {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    align-items: center;
+  }
+
+  .filter-pill {
+    padding: 6px 14px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .filter-pill:hover { border-color: var(--amber); color: var(--text); }
+  .filter-pill.active { background: var(--amber-dim); border-color: var(--amber); color: var(--amber); }
+
+  .search-input {
+    padding: 6px 12px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    width: 200px;
+    margin-left: auto;
+  }
+
+  .search-input:focus { outline:none; border-color:var(--amber); }
+
+  /* ===== BUTTONS ===== */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-primary { background: var(--amber); color: var(--bg); }
+  .btn-primary:hover { background: #e0952f; }
+
+  .btn-sm {
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text2);
+  }
+
+  .btn-outline:hover { border-color: var(--amber); color: var(--text); }
+
+  .btn-approve { background: var(--green-dim); color: var(--green); border: 1px solid transparent; }
+  .btn-approve:hover { border-color: var(--green); }
+
+  .btn-cancel { background: var(--red-dim); color: var(--red); border: 1px solid transparent; }
+  .btn-cancel:hover { border-color: var(--red); }
+
+  /* ===== WO TABLE ===== */
+  .wo-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .wo-table th {
+    text-align: left;
+    padding: 10px 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  .wo-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  .wo-table tr:hover { background: var(--bg2); }
+  .wo-table tr.expanded { background: var(--bg2); }
+
+  .wo-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 700;
+    color: var(--amber);
+    cursor: pointer;
+  }
+
+  .wo-num:hover { text-decoration: underline; }
+
+  .wo-desc {
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Status badges */
+  .badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .badge-Open { background: var(--blue-dim); color: var(--blue); }
+  .badge-Approved { background: var(--green-dim); color: var(--green); }
+  .badge-On-Hold { background: var(--yellow-dim); color: var(--yellow); }
+  .badge-In-Progress { background: var(--amber-dim); color: var(--amber); }
+  .badge-Complete { background: var(--green-dim); color: var(--green); }
+  .badge-Cancelled { background: var(--red-dim); color: var(--red); }
+
+  .priority-Critical { color: var(--red); font-weight: 600; }
+  .priority-High { color: #e67e22; font-weight: 600; }
+  .priority-Medium { color: var(--amber); }
+  .priority-Low { color: var(--text2); }
+
+  /* ===== EXPANDED ROW / DETAIL PANEL ===== */
+  .wo-detail-row { display: none; }
+  .wo-detail-row.open { display: table-row; }
+
+  .wo-detail-panel {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px;
+    margin: 4px 0;
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .detail-group label {
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+
+  .detail-group .value {
+    font-size: 14px;
+    color: var(--text);
+  }
+
+  .detail-group select,
+  .detail-group input,
+  .detail-group textarea {
+    width: 100%;
+    padding: 6px 10px;
+    background: var(--bg4);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+  }
+
+  .detail-group select:focus,
+  .detail-group input:focus,
+  .detail-group textarea:focus {
+    outline: none;
+    border-color: var(--amber);
+  }
+
+  .detail-group select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238a8580' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 28px;
+  }
+
+  .detail-group textarea { resize: vertical; min-height: 60px; }
+
+  .detail-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+
+  .pm-link {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--blue);
+  }
+
+  .status-timeline-mini {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .timeline-mini-item {
+    display: flex;
+    gap: 8px;
+    padding: 4px 0;
+    font-size: 12px;
+    color: var(--text2);
+  }
+
+  .timeline-mini-item .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--amber);
+    margin-top: 5px;
+    flex-shrink: 0;
+  }
+
+  /* ===== MODAL ===== */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 28px;
+    max-width: 540px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .modal h3 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--amber);
+    margin-bottom: 16px;
+  }
+
+  .modal .form-group {
+    margin-bottom: 14px;
+  }
+
+  .modal label {
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+
+  .modal input, .modal select, .modal textarea {
+    width: 100%;
+    padding: 8px 12px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+  }
+
+  .modal input:focus, .modal select:focus, .modal textarea:focus {
+    outline: none;
+    border-color: var(--amber);
+  }
+
+  .modal select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238a8580' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+  }
+
+  .modal textarea { resize: vertical; min-height: 80px; }
+
+  .modal .row { display: flex; gap: 12px; }
+  .modal .row .form-group { flex: 1; }
+
+  .modal-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 20px;
+  }
+
+  .modal-actions .btn { flex: 1; justify-content: center; }
+
+  .required::after { content: ' *'; color: var(--amber); }
+
+  /* ===== SETUP ===== */
+  .setup-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+
+  .setup-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 32px;
+    max-width: 480px;
+    width: 90%;
+  }
+
+  .setup-box h2 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 18px;
+    color: var(--amber);
+    margin-bottom: 8px;
+  }
+
+  .setup-box .subtitle {
+    color: var(--text2);
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+
+  .setup-box .form-group { margin-bottom: 12px; }
+
+  .setup-box label {
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .setup-box input {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+  }
+
+  .setup-box input:focus { outline:none; border-color:var(--amber); }
+
+  /* ===== TOAST ===== */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--bg2);
+    border: 1px solid var(--amber);
+    color: var(--text);
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 13px;
+    z-index: 1001;
+    transition: transform 0.3s ease;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ===== EMPTY STATE ===== */
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--text2);
+  }
+
+  .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 768px) {
+    .detail-grid { grid-template-columns: 1fr; }
+    .stats-row { grid-template-columns: repeat(3, 1fr); }
+    .wo-table { font-size: 12px; }
+    .wo-table th:nth-child(5), .wo-table td:nth-child(5) { display: none; }
+    .wo-table th:nth-child(6), .wo-table td:nth-child(6) { display: none; }
+    .modal .row { flex-direction: column; gap: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== SETUP OVERLAY ===== -->
+<div id="setupOverlay" class="setup-overlay" style="display:none;">
+  <div class="setup-box">
+    <h2>🔧 Work Orders — Test Mode</h2>
+    <p class="subtitle">Enter your Supabase credentials and email to test the Work Order system.</p>
+    <div class="form-group">
+      <label>Supabase Project URL</label>
+      <input type="text" id="setupUrl" placeholder="https://xxxxx.supabase.co">
+    </div>
+    <div class="form-group">
+      <label>API Key</label>
+      <input type="text" id="setupKey" placeholder="sb_publishable_...">
+    </div>
+    <div class="form-group">
+      <label>Your Email</label>
+      <input type="email" id="setupEmail" placeholder="mike.walsh@stumptowncoffee.com">
+    </div>
+    <button class="btn btn-primary" style="width:100%;margin-top:8px;justify-content:center;" onclick="saveSetup()">Connect & Login</button>
+  </div>
+</div>
+
+<!-- ===== TOPBAR ===== -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div>
+      <div class="topbar-brand">☕ STUMPTOWN CMMS</div>
+    </div>
+    <span class="topbar-badge">TEST — Work Orders</span>
+  </div>
+  <div class="topbar-right">
+    <span class="sync-dot" id="syncDot">●</span>
+    <span id="roleDisplay" class="topbar-role role-admin"></span>
+    <span class="topbar-user" id="userDisplay"></span>
+  </div>
+</div>
+
+<!-- ===== MAIN CONTENT ===== -->
+<div class="container">
+  <!-- Header -->
+  <div class="header-row">
+    <h2>Work Orders</h2>
+    <button class="btn btn-primary" onclick="openNewWOModal()">+ New Work Order</button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row" id="statsRow">
+    <div class="stat-card"><div class="stat-num" id="statTotal">0</div><div class="stat-label">Total</div></div>
+    <div class="stat-card"><div class="stat-num" id="statOpen">0</div><div class="stat-label">Open</div></div>
+    <div class="stat-card pending"><div class="stat-num" id="statInProgress">0</div><div class="stat-label">In Progress</div></div>
+    <div class="stat-card critical"><div class="stat-num" id="statCritical">0</div><div class="stat-label">Critical</div></div>
+    <div class="stat-card complete"><div class="stat-num" id="statComplete">0</div><div class="stat-label">Complete</div></div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <span class="filter-pill active" data-filter="status" data-value="all" onclick="setFilter(this)">All</span>
+    <span class="filter-pill" data-filter="status" data-value="Open" onclick="setFilter(this)">Open</span>
+    <span class="filter-pill" data-filter="status" data-value="Approved" onclick="setFilter(this)">Approved</span>
+    <span class="filter-pill" data-filter="status" data-value="In Progress" onclick="setFilter(this)">In Progress</span>
+    <span class="filter-pill" data-filter="status" data-value="On Hold" onclick="setFilter(this)">On Hold</span>
+    <span class="filter-pill" data-filter="status" data-value="Complete" onclick="setFilter(this)">Complete</span>
+    <span class="filter-pill" data-filter="status" data-value="Cancelled" onclick="setFilter(this)">Cancelled</span>
+    <input type="text" class="search-input" placeholder="🔍 Search WOs..." oninput="filterWOs()">
+  </div>
+
+  <!-- WO Table -->
+  <table class="wo-table" id="woTable">
+    <thead>
+      <tr>
+        <th>WO #</th>
+        <th>Priority</th>
+        <th>Status</th>
+        <th>Equipment</th>
+        <th>Dept</th>
+        <th>Assigned</th>
+        <th>Submitted</th>
+      </tr>
+    </thead>
+    <tbody id="woTableBody">
+    </tbody>
+  </table>
+
+  <div id="emptyState" class="empty-state" style="display:none;">
+    <div class="icon">📋</div>
+    <p>No work orders yet. Click "+ New Work Order" to create one, or submit one from the public request form.</p>
+  </div>
+</div>
+
+<!-- ===== NEW WO MODAL ===== -->
+<div id="newWOModal" class="modal-overlay">
+  <div class="modal">
+    <h3>New Work Order</h3>
+    <div class="row">
+      <div class="form-group">
+        <label class="required">Facility</label>
+        <select id="new_facility">
+          <option value="HQ">HQ</option>
+          <option value="Creek">Creek</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="required">Department</label>
+        <select id="new_dept">
+          <option value="R">Roasting</option>
+          <option value="GH">Green Handling</option>
+          <option value="P">Production</option>
+          <option value="F">Facility</option>
+          <option value="CB">Cold Brew</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="required">Equipment / Asset</label>
+      <input type="text" id="new_asset" placeholder="e.g. Probat Roaster #2">
+    </div>
+    <div class="row">
+      <div class="form-group">
+        <label class="required">Priority</label>
+        <select id="new_priority">
+          <option value="Medium">Medium</option>
+          <option value="Low">Low</option>
+          <option value="High">High</option>
+          <option value="Critical">Critical</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Source PM Task</label>
+        <input type="text" id="new_source_pm" placeholder="e.g. PM-T001 (optional)">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="required">Description</label>
+      <textarea id="new_desc" placeholder="Describe the issue — what needs to be repaired/addressed?"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('newWOModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="createWO()">Create Work Order</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div id="toast" class="toast"></div>
+
+<script>
+// ===== CONFIG =====
+const ADMIN_EMAILS = [
+  'mike.walsh@stumptowncoffee.com',
+  'scotth@stumptowncoffee.com',
+  'alex.evans@stumptowncoffee.com',
+  'eric.crespo@stumptowncoffee.com'
+];
+
+const STATUSES = ['Open', 'Approved', 'On Hold', 'In Progress', 'Complete', 'Cancelled'];
+const PRIORITIES = ['Critical', 'High', 'Medium', 'Low'];
+const DEPTS = ['R', 'GH', 'P', 'F', 'CB', 'Maintenance'];
+const DEPT_NAMES = { R:'Roasting', GH:'Green Handling', P:'Production', F:'Facility', CB:'Cold Brew', Maintenance:'Maintenance' };
+
+let SUPABASE_URL = localStorage.getItem('sb_url') || '';
+let SUPABASE_KEY = localStorage.getItem('sb_key') || '';
+let USER_EMAIL = localStorage.getItem('wo_test_email') || '';
+let IS_ADMIN = false;
+
+let allWOs = [];
+let woHistories = {};
+let activeFilter = 'all';
+let searchTerm = '';
+let expandedWO = null;
+
+// ===== SUPABASE =====
+function sbHeaders() {
+  return {
+    'apikey': SUPABASE_KEY,
+    'Authorization': 'Bearer ' + SUPABASE_KEY,
+    'Content-Type': 'application/json',
+    'Prefer': 'return=representation'
+  };
+}
+
+async function sbFetch(path, opts = {}) {
+  const resp = await fetch(SUPABASE_URL + '/rest/v1/' + path, { headers: sbHeaders(), ...opts });
+  if (!resp.ok) {
+    const text = await resp.text();
+    throw new Error(`Supabase ${resp.status}: ${text}`);
+  }
+  return resp.json();
+}
+
+// ===== SETUP =====
+function checkSetup() {
+  if (!SUPABASE_URL || !SUPABASE_KEY || !USER_EMAIL) {
+    document.getElementById('setupUrl').value = SUPABASE_URL;
+    document.getElementById('setupKey').value = SUPABASE_KEY;
+    document.getElementById('setupEmail').value = USER_EMAIL;
+    document.getElementById('setupOverlay').style.display = 'flex';
+  } else {
+    initApp();
+  }
+}
+
+function saveSetup() {
+  const url = document.getElementById('setupUrl').value.trim().replace(/\/$/, '');
+  const key = document.getElementById('setupKey').value.trim();
+  const email = document.getElementById('setupEmail').value.trim().toLowerCase();
+  if (!url || !key || !email) { showToast('Please fill in all fields'); return; }
+  localStorage.setItem('sb_url', url);
+  localStorage.setItem('sb_key', key);
+  localStorage.setItem('wo_test_email', email);
+  SUPABASE_URL = url;
+  SUPABASE_KEY = key;
+  USER_EMAIL = email;
+  document.getElementById('setupOverlay').style.display = 'none';
+  initApp();
+}
+
+function initApp() {
+  IS_ADMIN = ADMIN_EMAILS.includes(USER_EMAIL);
+  document.getElementById('userDisplay').textContent = USER_EMAIL;
+  const roleEl = document.getElementById('roleDisplay');
+  roleEl.textContent = IS_ADMIN ? 'Admin' : 'Technician';
+  roleEl.className = 'topbar-role ' + (IS_ADMIN ? 'role-admin' : 'role-tech');
+  loadWOs();
+}
+
+// ===== LOAD DATA =====
+async function loadWOs() {
+  try {
+    allWOs = await sbFetch('work_orders?select=*&order=created_at.desc');
+
+    // Load all histories at once
+    const allHistory = await sbFetch('wo_status_history?select=*&order=created_at.asc');
+    woHistories = {};
+    for (const h of allHistory) {
+      if (!woHistories[h.wo_id]) woHistories[h.wo_id] = [];
+      woHistories[h.wo_id].push(h);
+    }
+
+    updateStats();
+    renderWOs();
+    document.getElementById('syncDot').style.color = 'var(--green)';
+  } catch (err) {
+    console.error('Load error:', err);
+    showToast('Error loading work orders');
+    document.getElementById('syncDot').style.color = 'var(--red)';
+  }
+}
+
+function updateStats() {
+  document.getElementById('statTotal').textContent = allWOs.length;
+  document.getElementById('statOpen').textContent = allWOs.filter(w => w.status === 'Open' || w.status === 'Approved').length;
+  document.getElementById('statInProgress').textContent = allWOs.filter(w => w.status === 'In Progress' || w.status === 'On Hold').length;
+  document.getElementById('statCritical').textContent = allWOs.filter(w => w.priority === 'Critical' && w.status !== 'Complete' && w.status !== 'Cancelled').length;
+  document.getElementById('statComplete').textContent = allWOs.filter(w => w.status === 'Complete').length;
+}
+
+// ===== RENDER =====
+function renderWOs() {
+  const tbody = document.getElementById('woTableBody');
+  let filtered = [...allWOs];
+
+  // Filter by status
+  if (activeFilter !== 'all') {
+    filtered = filtered.filter(w => w.status === activeFilter);
+  }
+
+  // Search
+  if (searchTerm) {
+    const s = searchTerm.toLowerCase();
+    filtered = filtered.filter(w =>
+      w.wo_number.toLowerCase().includes(s) ||
+      w.asset_name.toLowerCase().includes(s) ||
+      w.description.toLowerCase().includes(s) ||
+      w.reported_by.toLowerCase().includes(s) ||
+      (w.assigned_dept || '').toLowerCase().includes(s)
+    );
+  }
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    document.getElementById('emptyState').style.display = 'block';
+    return;
+  }
+
+  document.getElementById('emptyState').style.display = 'none';
+
+  tbody.innerHTML = filtered.map(wo => {
+    const statusClass = 'badge-' + wo.status.replace(/\s/g, '-');
+    const isExpanded = expandedWO === wo.id;
+    const history = woHistories[wo.id] || [];
+
+    let detailHtml = '';
+    if (isExpanded) {
+      detailHtml = `
+        <tr class="wo-detail-row open">
+          <td colspan="7">
+            <div class="wo-detail-panel">
+              <div class="detail-grid">
+                <div class="detail-group">
+                  <label>Reported By</label>
+                  <div class="value">${wo.reported_by} (${wo.reporter_email})</div>
+                </div>
+                <div class="detail-group">
+                  <label>Facility</label>
+                  <div class="value">${wo.facility}</div>
+                </div>
+                <div class="detail-group">
+                  <label>Description</label>
+                  <div class="value">${wo.description}</div>
+                </div>
+                ${wo.source_pm_id ? `
+                <div class="detail-group">
+                  <label>Source PM Task</label>
+                  <div class="value"><span class="pm-link">${wo.source_pm_id}</span></div>
+                </div>` : ''}
+                ${IS_ADMIN ? `
+                <div class="detail-group">
+                  <label>Status</label>
+                  <select onchange="updateField('${wo.id}','status',this.value,'${wo.status}')">
+                    ${STATUSES.map(s => `<option value="${s}" ${s===wo.status?'selected':''}>${s}</option>`).join('')}
+                  </select>
+                </div>
+                <div class="detail-group">
+                  <label>Assign to Department</label>
+                  <select onchange="updateField('${wo.id}','assigned_dept',this.value)">
+                    <option value="">Unassigned</option>
+                    ${DEPTS.map(d => `<option value="${d}" ${d===wo.assigned_dept?'selected':''}>${DEPT_NAMES[d]}</option>`).join('')}
+                  </select>
+                </div>
+                <div class="detail-group">
+                  <label>Priority</label>
+                  <select onchange="updateField('${wo.id}','priority',this.value)">
+                    ${PRIORITIES.map(p => `<option value="${p}" ${p===wo.priority?'selected':''}>${p}</option>`).join('')}
+                  </select>
+                </div>
+                <div class="detail-group">
+                  <label>Labor Minutes</label>
+                  <input type="number" value="${wo.labor_mins||''}" placeholder="0"
+                    onchange="updateField('${wo.id}','labor_mins',this.value?parseInt(this.value):null)">
+                </div>
+                <div class="detail-group" style="grid-column:1/-1;">
+                  <label>Resolution Notes</label>
+                  <textarea onchange="updateField('${wo.id}','resolution_notes',this.value)"
+                    placeholder="What was done to resolve this?">${wo.resolution_notes||''}</textarea>
+                </div>
+                <div class="detail-group" style="grid-column:1/-1;">
+                  <label>Parts Used</label>
+                  <input type="text" value="${wo.parts_used||''}" placeholder="e.g. Bearing #4520, Seal kit"
+                    onchange="updateField('${wo.id}','parts_used',this.value)">
+                </div>
+                ` : `
+                <div class="detail-group">
+                  <label>Assigned Dept</label>
+                  <div class="value">${wo.assigned_dept ? DEPT_NAMES[wo.assigned_dept] : 'Unassigned'}</div>
+                </div>
+                ${wo.resolution_notes ? `
+                <div class="detail-group">
+                  <label>Resolution</label>
+                  <div class="value">${wo.resolution_notes}</div>
+                </div>` : ''}
+                `}
+              </div>
+              ${IS_ADMIN && wo.status === 'Open' ? `
+              <div class="detail-actions">
+                <button class="btn btn-sm btn-approve" onclick="quickApprove('${wo.id}')">✓ Approve</button>
+                <button class="btn btn-sm btn-cancel" onclick="quickCancel('${wo.id}')">✕ Cancel</button>
+              </div>` : ''}
+              ${history.length > 0 ? `
+              <div class="status-timeline-mini">
+                <label style="font-size:10px;color:var(--text2);font-family:'IBM Plex Mono',monospace;text-transform:uppercase;margin-bottom:6px;display:block;">Status History</label>
+                ${history.map(h => `
+                  <div class="timeline-mini-item">
+                    <div class="dot"></div>
+                    <div>
+                      ${h.old_status ? h.old_status + ' → ' : ''}${h.new_status}${h.notes ? ' — ' + h.notes : ''}
+                      <span style="color:var(--text2);font-size:11px;margin-left:8px;">${fmtDate(h.created_at)}</span>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>` : ''}
+            </div>
+          </td>
+        </tr>
+      `;
+    }
+
+    return `
+      <tr class="${isExpanded ? 'expanded' : ''}" onclick="toggleExpand('${wo.id}')">
+        <td><span class="wo-num">${wo.wo_number}</span></td>
+        <td><span class="priority-${wo.priority}">${wo.priority}</span></td>
+        <td><span class="badge ${statusClass}">${wo.status}</span></td>
+        <td class="wo-desc">${wo.asset_name}</td>
+        <td>${DEPT_NAMES[wo.department] || wo.department}</td>
+        <td>${wo.assigned_dept ? DEPT_NAMES[wo.assigned_dept] : '—'}</td>
+        <td style="white-space:nowrap;">${fmtDateShort(wo.created_at)}</td>
+      </tr>
+      ${detailHtml}
+    `;
+  }).join('');
+}
+
+// ===== INTERACTIONS =====
+function toggleExpand(woId) {
+  expandedWO = expandedWO === woId ? null : woId;
+  renderWOs();
+}
+
+function setFilter(el) {
+  document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  activeFilter = el.dataset.value;
+  renderWOs();
+}
+
+function filterWOs() {
+  searchTerm = document.querySelector('.search-input').value;
+  renderWOs();
+}
+
+// ===== ADMIN ACTIONS =====
+async function updateField(woId, field, value, oldValue) {
+  if (!IS_ADMIN) { showToast('Admin access required'); return; }
+
+  try {
+    const body = {};
+    body[field] = value;
+
+    // If status is being changed to Approved, record who approved
+    if (field === 'status' && value === 'Approved') {
+      body.approved_by = USER_EMAIL;
+      body.approved_at = new Date().toISOString();
+    }
+
+    await sbFetch('work_orders?id=eq.' + woId, {
+      method: 'PATCH',
+      body: JSON.stringify(body)
+    });
+
+    // Log status change to history
+    if (field === 'status' && oldValue) {
+      await sbFetch('wo_status_history', {
+        method: 'POST',
+        body: JSON.stringify({
+          wo_id: woId,
+          old_status: oldValue,
+          new_status: value,
+          changed_by: USER_EMAIL,
+          notes: value === 'Approved' ? 'Approved by ' + USER_EMAIL : null
+        })
+      });
+    }
+
+    showToast('Updated');
+    await loadWOs();
+    expandedWO = woId; // keep panel open
+    renderWOs();
+  } catch (err) {
+    console.error('Update error:', err);
+    showToast('Error updating work order');
+  }
+}
+
+async function quickApprove(woId) {
+  await updateField(woId, 'status', 'Approved', 'Open');
+}
+
+async function quickCancel(woId) {
+  await updateField(woId, 'status', 'Cancelled', 'Open');
+}
+
+// ===== CREATE WO =====
+function openNewWOModal() {
+  document.getElementById('newWOModal').classList.add('open');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+async function createWO() {
+  const facility = document.getElementById('new_facility').value;
+  const dept = document.getElementById('new_dept').value;
+  const asset = document.getElementById('new_asset').value.trim();
+  const priority = document.getElementById('new_priority').value;
+  const sourcePm = document.getElementById('new_source_pm').value.trim();
+  const desc = document.getElementById('new_desc').value.trim();
+
+  if (!asset || !desc) {
+    showToast('Equipment and description are required');
+    return;
+  }
+
+  try {
+    const result = await sbFetch('work_orders', {
+      method: 'POST',
+      body: JSON.stringify({
+        wo_number: '',
+        facility: facility,
+        department: dept,
+        asset_name: asset,
+        description: desc,
+        reported_by: USER_EMAIL.split('@')[0],
+        reporter_email: USER_EMAIL,
+        priority: priority,
+        status: 'Open',
+        source_pm_id: sourcePm || null
+      })
+    });
+
+    const wo = result[0];
+
+    // Log initial status
+    await sbFetch('wo_status_history', {
+      method: 'POST',
+      body: JSON.stringify({
+        wo_id: wo.id,
+        old_status: null,
+        new_status: 'Open',
+        changed_by: USER_EMAIL,
+        notes: sourcePm ? 'Created from PM task ' + sourcePm : 'Work order submitted'
+      })
+    });
+
+    closeModal('newWOModal');
+    document.getElementById('new_asset').value = '';
+    document.getElementById('new_desc').value = '';
+    document.getElementById('new_source_pm').value = '';
+    showToast('Created ' + wo.wo_number);
+    await loadWOs();
+  } catch (err) {
+    console.error('Create error:', err);
+    showToast('Error creating work order');
+  }
+}
+
+// ===== HELPERS =====
+function fmtDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) +
+    ' ' + d.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+}
+
+function fmtDateShort(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Close modals on outside click
+document.addEventListener('click', (e) => {
+  if (e.target.classList.contains('modal-overlay')) {
+    e.target.classList.remove('open');
+  }
+});
+
+// ===== INIT =====
+window.addEventListener('DOMContentLoaded', checkSetup);
+</script>
+</body>
+</html>
