@@ -1,0 +1,2165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stumptown Coffee — PM Portal v3.1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0e0f0f; --bg2:#161818; --bg3:#1e2020; --bg4:#252828;
+  --border:#2e3232; --text:#e8e4dc; --text2:#9ca3a3; --text3:#5a6262;
+  --amber:#d4882a; --amber-light:#f0a83c; --amber-dim:#3a2808;
+  --red:#c94040; --red-dim:#2e1010; --green:#4a9e6c; --green-dim:#0d2218;
+  --blue:#4a7fb5; --blue-dim:#0d1e30; --yellow:#c9a840; --yellow-dim:#2a2208;
+  --purple:#8a6ab5; --purple-dim:#1a1228;
+  --font-mono:'IBM Plex Mono',monospace; --font-sans:'IBM Plex Sans',sans-serif;
+  --radius:4px; --shadow:0 2px 12px rgba(0,0,0,0.4);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-sans);font-size:14px;line-height:1.5;min-height:100vh;}
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:var(--bg2);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+/* CONFIG SCREEN */
+#config-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:2000;}
+.config-card{background:var(--bg2);border:1px solid var(--amber);border-radius:8px;padding:40px;width:520px;box-shadow:0 20px 60px rgba(0,0,0,0.6);}
+.config-title{font-size:18px;font-weight:600;color:var(--amber-light);margin-bottom:6px;}
+.config-sub{color:var(--text2);font-size:13px;margin-bottom:24px;font-family:var(--font-mono);}
+.config-step{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:16px;margin-bottom:12px;}
+.config-step-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:8px;}
+.config-input{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:var(--radius);font-family:var(--font-mono);font-size:12px;margin-bottom:8px;}
+.config-input:focus{outline:none;border-color:var(--amber);}
+.config-input:last-child{margin-bottom:0;}
+.config-hint{font-size:11px;color:var(--text3);font-family:var(--font-mono);margin-bottom:8px;}
+.config-btn{width:100%;padding:12px;background:var(--amber);color:#000;border:none;border-radius:var(--radius);font-size:14px;font-weight:600;cursor:pointer;margin-top:12px;transition:background .15s;}
+.config-btn:hover{background:var(--amber-light);}
+.config-status{margin-top:12px;padding:10px;border-radius:var(--radius);font-size:12px;font-family:var(--font-mono);display:none;}
+.config-status.error{background:var(--red-dim);border:1px solid var(--red);color:var(--red);}
+.config-status.ok{background:var(--green-dim);border:1px solid var(--green);color:var(--green);}
+
+/* LOGIN */
+#login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:1000;display:none;}
+.login-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:48px 40px;width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.6);}
+.login-logo{display:flex;align-items:center;gap:12px;margin-bottom:32px;}
+.login-logo-mark{width:36px;height:36px;background:var(--amber);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#000;font-family:var(--font-mono);}
+.login-logo-text{font-size:13px;color:var(--text2);letter-spacing:.15em;text-transform:uppercase;font-weight:500;}
+.login-logo-sub{font-size:11px;color:var(--text3);font-family:var(--font-mono);}
+.login-title{font-size:22px;font-weight:600;margin-bottom:8px;}
+.login-sub{color:var(--text2);font-size:13px;margin-bottom:28px;}
+.login-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--text2);margin-bottom:6px;display:block;}
+.login-input{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:var(--radius);font-family:var(--font-sans);font-size:14px;margin-bottom:16px;}
+.login-input:focus{outline:none;border-color:var(--amber);}
+.login-select{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:var(--radius);font-family:var(--font-sans);font-size:14px;margin-bottom:20px;appearance:none;cursor:pointer;}
+.login-select:focus{outline:none;border-color:var(--amber);}
+.login-btn{width:100%;padding:12px;background:var(--amber);color:#000;border:none;border-radius:var(--radius);font-size:14px;font-weight:600;cursor:pointer;letter-spacing:.05em;transition:background .15s;}
+.login-btn:hover{background:var(--amber-light);}
+.login-footer{margin-top:20px;text-align:center;color:var(--text3);font-size:12px;font-family:var(--font-mono);}
+
+/* APP */
+#app{display:none;min-height:100vh;flex-direction:column;}
+
+/* TOPBAR */
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 20px;height:54px;display:flex;align-items:center;gap:20px;position:sticky;top:0;z-index:100;}
+.topbar-logo{display:flex;align-items:center;gap:10px;}
+.topbar-mark{width:28px;height:28px;background:var(--amber);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#000;font-family:var(--font-mono);}
+.topbar-name{font-weight:600;font-size:15px;}
+.topbar-sub{font-size:11px;color:var(--text3);font-family:var(--font-mono);}
+.topbar-nav{display:flex;gap:2px;margin-left:20px;}
+.nav-btn{padding:6px 14px;background:none;border:none;color:var(--text2);cursor:pointer;font-size:13px;font-family:var(--font-sans);border-radius:var(--radius);transition:all .15s;font-weight:500;}
+.nav-btn:hover{background:var(--bg3);color:var(--text);}
+.nav-btn.active{background:var(--bg3);color:var(--amber);}
+.nav-badge{display:inline-flex;align-items:center;justify-content:center;background:var(--red);color:#fff;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:8px;padding:0 4px;margin-left:5px;font-family:var(--font-mono);}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:12px;}
+.topbar-user{display:flex;align-items:center;gap:8px;background:var(--bg3);padding:6px 12px;border-radius:var(--radius);border:1px solid var(--border);}
+.user-avatar{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#000;}
+.topbar-user-name{font-size:13px;font-weight:500;}
+.topbar-user-role{font-size:11px;color:var(--text3);}
+.logout-btn{background:none;border:1px solid var(--border);color:var(--text3);padding:5px 10px;border-radius:var(--radius);cursor:pointer;font-size:12px;font-family:var(--font-sans);transition:all .15s;}
+.logout-btn:hover{color:var(--text);border-color:var(--text2);}
+.sync-indicator{font-size:11px;font-family:var(--font-mono);color:var(--text3);display:flex;align-items:center;gap:5px;}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--green);}
+.sync-dot.syncing{background:var(--amber);animation:pulse 1s infinite;}
+.sync-dot.error{background:var(--red);}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+
+/* VIEWS */
+.view{display:none;flex:1;}
+.view.active{display:flex;flex-direction:column;}
+
+/* DASHBOARD */
+.dash-content{padding:24px;overflow-y:auto;flex:1;}
+.dash-header{margin-bottom:24px;}
+.dash-header h1{font-size:20px;font-weight:600;}
+.dash-header p{color:var(--text2);font-size:13px;margin-top:2px;font-family:var(--font-mono);}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-bottom:28px;}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:16px;}
+.stat-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:8px;}
+.stat-value{font-size:28px;font-weight:700;font-family:var(--font-mono);line-height:1;}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:4px;font-family:var(--font-mono);}
+.stat-card.red{border-color:var(--red);background:var(--red-dim);}
+.stat-card.red .stat-value{color:var(--red);}
+.stat-card.amber{border-color:var(--amber);background:var(--amber-dim);}
+.stat-card.amber .stat-value{color:var(--amber-light);}
+.stat-card.green{border-color:var(--green);background:var(--green-dim);}
+.stat-card.green .stat-value{color:var(--green);}
+.dash-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+@media(max-width:900px){.dash-row{grid-template-columns:1fr;}}
+.dash-panel{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:16px;}
+.panel-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:14px;}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.bar-label{font-size:12px;color:var(--text2);width:90px;flex-shrink:0;}
+.bar-track{flex:1;background:var(--bg3);border-radius:2px;height:6px;}
+.bar-fill{height:6px;border-radius:2px;transition:width .4s;}
+.bar-count{font-size:12px;font-family:var(--font-mono);color:var(--text2);width:30px;text-align:right;}
+.overdue-list{max-height:220px;overflow-y:auto;}
+.overdue-item{display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border);gap:12px;}
+.overdue-item:last-child{border-bottom:none;}
+.overdue-name{font-size:13px;font-weight:500;}
+.overdue-asset{font-size:11px;color:var(--text3);font-family:var(--font-mono);}
+.overdue-date{font-size:11px;color:var(--red);font-family:var(--font-mono);white-space:nowrap;}
+
+/* FILTER BAR */
+.filter-bar{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.filter-search{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:7px 12px;border-radius:var(--radius);font-family:var(--font-sans);font-size:13px;min-width:180px;}
+.filter-search:focus{outline:none;border-color:var(--amber);}
+.filter-select{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:var(--radius);font-family:var(--font-sans);font-size:13px;cursor:pointer;appearance:none;}
+.filter-select:focus{outline:none;border-color:var(--amber);}
+.filter-pill{padding:5px 12px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:20px;cursor:pointer;font-size:12px;font-family:var(--font-sans);transition:all .15s;}
+.filter-pill:hover{border-color:var(--text2);color:var(--text);}
+.filter-pill.active{background:var(--amber-dim);border-color:var(--amber);color:var(--amber-light);}
+.filter-pill.red-pill.active{background:var(--red-dim);border-color:var(--red);color:var(--red);}
+.filter-count{font-size:12px;font-family:var(--font-mono);color:var(--text3);margin-left:4px;}
+.filter-clear{padding:5px 10px;background:none;border:1px solid var(--border);color:var(--text3);border-radius:var(--radius);cursor:pointer;font-size:12px;font-family:var(--font-sans);transition:all .15s;}
+.filter-clear:hover{color:var(--text);border-color:var(--text2);}
+
+/* TASK LIST */
+.task-list-content{flex:1;overflow-y:auto;}
+.task-list-header{display:grid;grid-template-columns:90px 1fr 90px 90px 55px 90px 140px;gap:0;padding:8px 16px;background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;}
+.th{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);}
+.asset-group{border-bottom:1px solid var(--border);}
+.asset-header{display:flex;align-items:center;gap:10px;padding:8px 16px;background:var(--bg2);cursor:pointer;user-select:none;}
+.asset-header:hover{background:var(--bg3);}
+.asset-chevron{color:var(--text3);font-size:11px;transition:transform .2s;}
+.asset-chevron.open{transform:rotate(90deg);}
+.asset-name{font-size:13px;font-weight:600;}
+.asset-dept{font-size:11px;font-family:var(--font-mono);color:var(--text3);background:var(--bg3);padding:1px 8px;border-radius:3px;}
+.asset-fac{font-size:11px;font-family:var(--font-mono);color:var(--text3);}
+.asset-task-count{font-size:11px;font-family:var(--font-mono);color:var(--text3);margin-left:auto;}
+.task-row{display:grid;grid-template-columns:90px 1fr 90px 90px 55px 90px 140px;gap:0;padding:8px 16px;border-bottom:1px solid rgba(46,50,50,0.4);align-items:center;transition:background .1s;}
+.task-row:hover{background:var(--bg2);}
+.task-row.completed{opacity:.55;}
+.task-row.overdue .task-due{color:var(--red)!important;}
+.task-row.due-soon .task-due{color:var(--yellow)!important;}
+.task-id{font-family:var(--font-mono);font-size:11px;color:var(--text3);}
+.task-instruction-main{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.task-instruction-sub{font-size:11px;color:var(--text3);font-family:var(--font-mono);}
+.task-freq{font-size:12px;font-family:var(--font-mono);color:var(--text2);}
+.task-due{font-size:12px;font-family:var(--font-mono);color:var(--text2);}
+.badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:3px;text-transform:uppercase;letter-spacing:.05em;display:inline-block;}
+.badge-critical{background:#2e1010;color:#c94040;border:1px solid #4a1818;}
+.badge-important{background:#2a2208;color:#c9a840;border:1px solid #4a3810;}
+.badge-routine{background:#1a1e1e;color:#5a7272;border:1px solid #2e3636;}
+.loto-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:.05em;}
+.loto-badge.yes{background:#1a1228;color:#8a6ab5;border:1px solid #3a2860;}
+.task-actions{display:flex;gap:6px;align-items:center;}
+.btn-complete{padding:5px 12px;background:var(--green-dim);border:1px solid var(--green);color:var(--green);border-radius:var(--radius);cursor:pointer;font-size:12px;font-weight:600;font-family:var(--font-sans);transition:all .15s;white-space:nowrap;}
+.btn-complete:hover{background:var(--green);color:#000;}
+.btn-complete.done{background:none;border-color:var(--border);color:var(--text3);cursor:default;}
+.btn-suggest{padding:5px 9px;background:none;border:1px solid var(--border);color:var(--text3);border-radius:var(--radius);cursor:pointer;font-size:12px;transition:all .15s;}
+.btn-suggest:hover{border-color:var(--purple);color:var(--purple);}
+.btn-blocked{padding:5px 9px;background:none;border:1px solid var(--border);color:var(--text3);border-radius:var(--radius);cursor:pointer;font-size:12px;transition:all .15s;}
+.btn-blocked:hover{border-color:var(--red);color:var(--red);}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;display:none;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:28px;width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.6);}
+.modal-title{font-size:18px;font-weight:600;margin-bottom:4px;}
+.modal-sub{font-size:12px;font-family:var(--font-mono);color:var(--amber);margin-bottom:8px;}
+.modal-instruction{font-size:13px;color:var(--text2);background:var(--bg3);padding:10px 12px;border-radius:var(--radius);margin-bottom:16px;border-left:3px solid var(--border);}
+.modal-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--text2);margin-bottom:6px;margin-top:14px;display:block;}
+.modal-input{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:var(--radius);font-family:var(--font-sans);font-size:13px;}
+.modal-input:focus{outline:none;border-color:var(--amber);}
+.modal-select{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:var(--radius);font-family:var(--font-sans);font-size:13px;appearance:none;}
+.modal-select:focus{outline:none;border-color:var(--amber);}
+.modal-textarea{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:var(--radius);font-family:var(--font-sans);font-size:13px;resize:vertical;min-height:80px;}
+.modal-textarea:focus{outline:none;border-color:var(--amber);}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.modal-row{display:flex;gap:10px;margin-top:20px;}
+.btn-primary{flex:1;padding:10px;background:var(--amber);color:#000;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;transition:background .15s;}
+.btn-primary:hover{background:var(--amber-light);}
+.btn-primary.purple{background:var(--purple);}
+.btn-primary.purple:hover{background:#a080d0;}
+.btn-secondary{padding:10px 16px;background:none;border:1px solid var(--border);color:var(--text2);border-radius:var(--radius);font-size:13px;cursor:pointer;transition:all .15s;}
+.btn-secondary:hover{border-color:var(--text2);color:var(--text);}
+.consumable-row{display:flex;gap:6px;align-items:center;margin-bottom:6px;}
+.consumable-input{flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:var(--radius);font-size:12px;font-family:var(--font-sans);}
+.consumable-input:focus{outline:none;border-color:var(--amber);}
+.btn-add-row{padding:4px 8px;background:none;border:1px solid var(--border);color:var(--text3);border-radius:var(--radius);cursor:pointer;font-size:12px;transition:all .15s;}
+.btn-add-row:hover{border-color:var(--amber);color:var(--amber);}
+.btn-rm-row{padding:4px 7px;background:none;border:1px solid var(--border);color:var(--text3);border-radius:var(--radius);cursor:pointer;font-size:12px;transition:all .15s;}
+.btn-rm-row:hover{border-color:var(--red);color:var(--red);}
+
+/* HISTORY VIEW */
+.history-content{flex:1;overflow-y:auto;padding:20px;}
+.history-toprow{display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
+.history-title{font-size:18px;font-weight:600;}
+.history-count{font-size:12px;font-family:var(--font-mono);color:var(--text3);}
+.history-filters{display:flex;gap:8px;margin-left:auto;align-items:center;flex-wrap:wrap;}
+.btn-export-sm{padding:7px 14px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:var(--radius);cursor:pointer;font-size:12px;transition:all .15s;}
+.btn-export-sm:hover{border-color:var(--text2);color:var(--text);}
+.history-table{width:100%;border-collapse:collapse;font-size:12px;}
+.history-table th{text-align:left;padding:8px 10px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;}
+.history-table td{padding:8px 10px;border-bottom:1px solid rgba(46,50,50,0.5);vertical-align:top;}
+.history-table tr:hover td{background:var(--bg2);}
+.history-table .mono{font-family:var(--font-mono);font-size:11px;color:var(--text3);}
+.consumable-tag{display:inline-block;background:var(--bg3);border:1px solid var(--border);padding:1px 7px;border-radius:3px;font-size:10px;font-family:var(--font-mono);color:var(--text2);margin:1px 2px;}
+
+/* SUGGESTIONS */
+.suggest-section{background:var(--bg2);border:1px solid var(--purple);border-radius:6px;padding:16px;margin-bottom:20px;}
+.suggest-section-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--purple);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.suggest-card{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:12px;margin-bottom:8px;}
+.suggest-card:last-child{margin-bottom:0;}
+.suggest-header{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.suggest-from{font-size:11px;font-family:var(--font-mono);color:var(--amber);}
+.suggest-time{font-size:11px;font-family:var(--font-mono);color:var(--text3);margin-left:auto;}
+.suggest-task{font-size:11px;font-family:var(--font-mono);background:var(--bg);padding:1px 6px;border-radius:3px;color:var(--text2);}
+.suggest-type{font-size:10px;font-weight:600;padding:1px 6px;border-radius:3px;text-transform:uppercase;background:var(--purple-dim);color:var(--purple);border:1px solid #4a3070;}
+.suggest-body{font-size:13px;color:var(--text);margin-bottom:8px;}
+.suggest-actions{display:flex;gap:6px;}
+.btn-approve{padding:4px 10px;background:var(--green-dim);border:1px solid var(--green);color:var(--green);border-radius:var(--radius);cursor:pointer;font-size:11px;font-weight:600;transition:all .15s;}
+.btn-approve:hover{background:var(--green);color:#000;}
+.btn-dismiss{padding:4px 10px;background:none;border:1px solid var(--border);color:var(--text3);border-radius:var(--radius);cursor:pointer;font-size:11px;transition:all .15s;}
+.btn-dismiss:hover{border-color:var(--red);color:var(--red);}
+
+/* ADMIN */
+.admin-content{flex:1;overflow-y:auto;padding:20px;}
+.admin-toprow{display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
+.admin-title{font-size:18px;font-weight:600;}
+.admin-count{font-size:12px;font-family:var(--font-mono);color:var(--text3);}
+.btn-add{padding:8px 16px;background:var(--amber-dim);border:1px solid var(--amber);color:var(--amber-light);border-radius:var(--radius);cursor:pointer;font-size:13px;font-weight:500;transition:all .15s;}
+.btn-add:hover{background:var(--amber);color:#000;}
+.btn-export{padding:8px 16px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:var(--radius);cursor:pointer;font-size:13px;transition:all .15s;}
+.btn-export:hover{border-color:var(--text2);color:var(--text);}
+.admin-table-wrap{overflow-x:auto;}
+.admin-table{width:100%;border-collapse:collapse;font-size:12px;}
+.admin-table th{text-align:left;padding:8px 10px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;position:sticky;top:0;background:var(--bg);}
+.admin-table td{padding:7px 10px;border-bottom:1px solid rgba(46,50,50,0.5);vertical-align:middle;max-width:280px;}
+.admin-table tr:hover td{background:var(--bg2);}
+.admin-table tr.editing td{background:var(--bg3);border-bottom-color:var(--amber);}
+.admin-table td.mono{font-family:var(--font-mono);font-size:11px;color:var(--text3);}
+.admin-table td.actions-cell,.admin-table th.actions-th{position:sticky;right:0;background:var(--bg);z-index:2;box-shadow:-4px 0 8px rgba(0,0,0,0.3);}
+.admin-table tr:hover td.actions-cell{background:var(--bg2);}
+.admin-table tr.editing td.actions-cell{background:var(--bg3);}
+.admin-table tr{cursor:pointer;}
+.instruction-cell{max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.inline-edit{background:var(--bg3);border:1px solid var(--amber);color:var(--text);padding:4px 6px;border-radius:3px;font-family:var(--font-sans);font-size:12px;width:100%;}
+.inline-select{background:var(--bg3);border:1px solid var(--amber);color:var(--text);padding:4px 6px;border-radius:3px;font-family:var(--font-sans);font-size:12px;}
+.btn-icon{background:none;border:none;cursor:pointer;padding:3px 5px;border-radius:3px;transition:all .15s;font-size:13px;}
+.btn-icon:hover{background:var(--bg3);}
+.btn-icon.del:hover{color:var(--red);}
+.btn-icon.edit-icon:hover{color:var(--amber);}
+.add-form{background:var(--bg2);border:1px solid var(--amber);border-radius:6px;padding:20px;margin-bottom:16px;display:none;}
+.add-form.open{display:block;}
+.add-form-title{font-size:14px;font-weight:600;color:var(--amber-light);margin-bottom:14px;}
+.add-form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:12px;}
+.add-form-field{display:flex;flex-direction:column;gap:4px;}
+.add-form-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);}
+.add-form-input{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:var(--radius);font-family:var(--font-sans);font-size:12px;}
+.add-form-input:focus{outline:none;border-color:var(--amber);}
+.add-form-row{display:flex;gap:8px;margin-top:4px;}
+
+/* TOAST */
+#toast-container{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+.toast{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:12px 16px;font-size:13px;min-width:240px;box-shadow:var(--shadow);animation:slideIn .2s ease;display:flex;gap:10px;align-items:center;}
+.toast.success{border-color:var(--green);}
+.toast.error{border-color:var(--red);}
+.toast.info{border-color:var(--blue);}
+.toast-icon{font-size:15px;}
+@keyframes slideIn{from{transform:translateX(20px);opacity:0;}to{transform:translateX(0);opacity:1;}}
+.empty-state{padding:60px 20px;text-align:center;color:var(--text3);}
+.empty-state h3{font-size:16px;font-weight:500;margin-bottom:6px;color:var(--text2);}
+.empty-state p{font-size:13px;font-family:var(--font-mono);}
+.loading-spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--amber);border-radius:50%;animation:spin .7s linear infinite;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+/* WORK ORDERS */
+.wo-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px;}
+.wo-stat{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center;}
+.wo-stat-num{font-family:var(--font-mono);font-size:26px;font-weight:700;color:var(--amber);}
+.wo-stat-num.red{color:var(--red);}
+.wo-stat-num.green{color:var(--green);}
+.wo-stat-num.yellow{color:var(--yellow);}
+.wo-stat-label{font-size:10px;color:var(--text2);text-transform:uppercase;font-family:var(--font-mono);margin-top:2px;}
+.wo-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center;}
+.wo-pill{padding:5px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:16px;font-family:var(--font-mono);font-size:11px;color:var(--text2);cursor:pointer;transition:all .2s;}
+.wo-pill:hover{border-color:var(--amber);color:var(--text);}
+.wo-pill.active{background:var(--amber-dim);border-color:var(--amber);color:var(--amber);}
+.wo-search{padding:5px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:16px;color:var(--text);font-size:13px;width:180px;margin-left:auto;}
+.wo-search:focus{outline:none;border-color:var(--amber);}
+.wo-filter-sel{padding:5px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;font-family:var(--font-mono);}
+.wo-table{width:100%;border-collapse:collapse;font-size:13px;}
+.wo-table th{text-align:left;padding:8px 10px;font-family:var(--font-mono);font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;}
+.wo-table td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:top;}
+.wo-table tr:hover{background:var(--bg2);}
+.wo-table tr.wo-expanded{background:var(--bg2);}
+.wo-num{font-family:var(--font-mono);font-weight:700;color:var(--amber);cursor:pointer;}
+.wo-num:hover{text-decoration:underline;}
+.wo-desc-cell{max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.wo-badge{display:inline-block;padding:2px 7px;border-radius:3px;font-family:var(--font-mono);font-size:10px;font-weight:600;text-transform:uppercase;}
+.wo-badge-Open{background:var(--blue-dim);color:var(--blue);}
+.wo-badge-Approved{background:var(--green-dim);color:var(--green);}
+.wo-badge-On-Hold{background:var(--yellow-dim);color:var(--yellow);}
+.wo-badge-In-Progress{background:var(--amber-dim);color:var(--amber);}
+.wo-badge-Complete{background:var(--green-dim);color:var(--green);}
+.wo-badge-Cancelled{background:var(--red-dim);color:var(--red);}
+.wo-pri-Critical{color:var(--red);font-weight:600;}
+.wo-pri-High{color:#e67e22;font-weight:600;}
+.wo-pri-Medium{color:var(--amber);}
+.wo-pri-Low{color:var(--text2);}
+.wo-detail-panel{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:18px;margin:4px 0;}
+.wo-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.wo-detail-group label{display:block;font-family:var(--font-mono);font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;margin-bottom:3px;}
+.wo-detail-group .val{font-size:14px;color:var(--text);}
+.wo-detail-group select,.wo-detail-group input,.wo-detail-group textarea{width:100%;padding:6px 10px;background:var(--bg4);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font-sans);font-size:13px;}
+.wo-detail-group select:focus,.wo-detail-group input:focus,.wo-detail-group textarea:focus{outline:none;border-color:var(--amber);}
+.wo-detail-group textarea{resize:vertical;min-height:50px;}
+.wo-note{background:var(--bg4);border-left:3px solid var(--amber);border-radius:0 4px 4px 0;padding:10px 12px;margin-bottom:8px;}
+.wo-note-hdr{display:flex;align-items:center;gap:8px;margin-bottom:3px;flex-wrap:wrap;}
+.wo-note-author{font-family:var(--font-mono);font-size:12px;font-weight:600;color:var(--amber);}
+.wo-note-status{font-family:var(--font-mono);font-size:10px;font-weight:600;color:var(--green);background:var(--green-dim);padding:2px 6px;border-radius:3px;text-transform:uppercase;}
+.wo-note-time{font-family:var(--font-mono);font-size:11px;color:var(--text3);margin-left:auto;}
+.wo-note-body{font-size:13px;color:var(--text);line-height:1.5;}
+.wo-timeline-item{display:flex;gap:8px;padding:4px 0;font-size:12px;color:var(--text2);}
+.wo-timeline-dot{width:6px;height:6px;border-radius:50%;background:var(--amber);margin-top:5px;flex-shrink:0;}
+.wo-actions{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap;}
+.wo-btn-approve{background:var(--green-dim);color:var(--green);border:1px solid transparent;padding:4px 10px;border-radius:var(--radius);font-family:var(--font-mono);font-size:11px;font-weight:600;cursor:pointer;}
+.wo-btn-approve:hover{border-color:var(--green);}
+.wo-btn-cancel{background:var(--red-dim);color:var(--red);border:1px solid transparent;padding:4px 10px;border-radius:var(--radius);font-family:var(--font-mono);font-size:11px;font-weight:600;cursor:pointer;}
+.wo-btn-cancel:hover{border-color:var(--red);}
+@media(max-width:768px){.wo-detail-grid{grid-template-columns:1fr;}.wo-table th:nth-child(5),.wo-table td:nth-child(5),.wo-table th:nth-child(6),.wo-table td:nth-child(6){display:none;}}
+</style>
+</head>
+<body>
+
+<!-- CONFIG SCREEN -->
+<div id="config-screen">
+  <div class="config-card">
+    <div class="config-title">⚙ Connect to Database</div>
+    <div class="config-sub">One-time setup — paste your Supabase keys below</div>
+    
+    <div class="config-step">
+      <div class="config-step-title">Step 1 — Supabase Project URL</div>
+      <div class="config-hint">In Supabase: Settings → API → Project URL</div>
+      <input class="config-input" id="cfg-url" placeholder="https://xxxxxxxxxxxxxxxxxxxx.supabase.co" autocomplete="off">
+    </div>
+    
+    <div class="config-step">
+      <div class="config-step-title">Step 2 — Supabase Anon Key</div>
+      <div class="config-hint">In Supabase: Settings → API → anon / public key</div>
+      <input class="config-input" id="cfg-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." autocomplete="off">
+    </div>
+
+    <div id="config-status" class="config-status"></div>
+    <button class="config-btn" onclick="saveConfig()">Connect & Launch Portal</button>
+    <div style="margin-top:16px;font-size:11px;color:var(--text3);font-family:var(--font-mono);text-align:center;">
+      Keys are saved in this browser only — never transmitted anywhere except Supabase
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-mark">S</div>
+      <div>
+        <div class="login-logo-text">Stumptown Coffee</div>
+        <div class="login-logo-sub">PM Portal · v3.1</div>
+      </div>
+    </div>
+    <div class="login-title">Sign In</div>
+    <div class="login-sub">Completions sync across the whole team</div>
+    <label class="login-label">Email</label>
+    <input class="login-input" id="login-email" type="email" placeholder="name@stumptowncoffee.com" 
+           oninput="previewRole()" onkeydown="if(event.key==='Enter')doLogin()">
+    <label class="login-label">Role</label>
+    <div id="login-role-display" style="padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);font-size:14px;color:var(--text2);margin-bottom:20px;font-family:var(--font-mono);">Technician</div>
+    <button class="login-btn" onclick="doLogin()">Enter Portal</button>
+    <div class="login-footer">stumptown maintenance team</div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-logo">
+      <div class="topbar-mark">S</div>
+      <div>
+        <div class="topbar-name">PM Portal</div>
+        <div class="topbar-sub">Stumptown Coffee · v3.1</div>
+      </div>
+    </div>
+    <div class="topbar-nav">
+      <button class="nav-btn active" onclick="switchView('dashboard',this)">Dashboard</button>
+      <button class="nav-btn" onclick="switchView('tasks',this)">PM Tasks</button>
+      <button class="nav-btn" onclick="switchView('history',this)">History</button>
+      <button class="nav-btn" onclick="switchView('workorders',this)">Work Orders <span class="nav-badge" id="wo-badge" style="display:none">0</span></button>
+      <button class="nav-btn admin-only" id="nav-admin" onclick="switchView('admin',this)" style="display:none">
+        Admin <span class="nav-badge" id="suggest-badge" style="display:none">0</span>
+      </button>
+      <button class="nav-btn admin-only" id="nav-reports" onclick="switchView('reports',this)" style="display:none">
+        Reports
+      </button>
+    </div>
+    <div class="topbar-right">
+      <div class="sync-indicator" id="sync-indicator">
+        <div class="sync-dot" id="sync-dot"></div>
+        <span id="sync-label">live</span>
+      </div>
+      <div class="topbar-user">
+        <div class="user-avatar" id="top-avatar" style="background:var(--amber)">MW</div>
+        <div>
+          <div class="topbar-user-name" id="top-name">—</div>
+          <div class="topbar-user-role" id="top-role">—</div>
+        </div>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="view active" id="view-dashboard">
+    <div class="dash-content">
+      <div class="dash-header">
+        <h1>Maintenance Overview</h1>
+        <p id="dash-date">—</p>
+      </div>
+      <div class="stats-grid" id="stats-grid"></div>
+      <div class="dash-row">
+        <div class="dash-panel"><div class="panel-title">Tasks by Department</div><div id="dept-chart"></div></div>
+        <div class="dash-panel"><div class="panel-title">Tasks by Priority</div><div id="priority-chart"></div></div>
+      </div>
+      <div class="dash-row">
+        <div class="dash-panel"><div class="panel-title">Overdue Tasks</div><div class="overdue-list" id="overdue-list"></div></div>
+        <div class="dash-panel"><div class="panel-title">Frequency Breakdown</div><div id="freq-chart"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PM TASKS -->
+  <div class="view" id="view-tasks">
+    <div class="filter-bar">
+      <input class="filter-search" id="task-search" placeholder="Search tasks…" oninput="applyFilters()">
+      <select class="filter-select" id="filter-facility" onchange="applyFilters()">
+        <option value="">All Facilities</option>
+        <option value="HQ">HQ</option>
+        <option value="Creek">Creek</option>
+      </select>
+      <select class="filter-select" id="filter-dept" onchange="applyFilters()">
+        <option value="">All Depts</option>
+        <option value="R">R – Roasting</option>
+        <option value="GH">GH – Green Handling</option>
+        <option value="P">P – Production</option>
+        <option value="F">F – Facility</option>
+        <option value="CB">CB – Cold Brew</option>
+        <option value="L">L – Logistics</option>
+        <option value="S">S – Safety</option>
+      </select>
+      <select class="filter-select" id="filter-freq" onchange="applyFilters()">
+        <option value="">All Frequencies</option>
+        <option>Weekly</option><option>Monthly</option><option>Quarterly</option>
+        <option>Bi-Annual</option><option>Annual</option><option>2-Year</option><option>5-Year</option>
+      </select>
+      <button class="filter-pill" id="pill-critical" onclick="togglePill('critical')">🔴 Critical</button>
+      <button class="filter-pill" id="pill-important" onclick="togglePill('important')">🟡 Important</button>
+      <button class="filter-pill" id="pill-routine" onclick="togglePill('routine')">⚪ Routine</button>
+      <button class="filter-pill red-pill" id="pill-overdue" onclick="togglePill('overdue')">⚡ Overdue</button>
+      <span class="filter-count" id="filter-count">0 tasks</span>
+      <button class="filter-clear" onclick="clearFilters()">Clear</button>
+    </div>
+    <div class="task-list-content" id="task-list-content">
+      <div class="task-list-header">
+        <div class="th">ID</div>
+        <div class="th">Task / Section</div>
+        <div class="th">Frequency</div>
+        <div class="th">Priority</div>
+        <div class="th">LOTO</div>
+        <div class="th">Next Due</div>
+        <div class="th">Actions</div>
+      </div>
+      <div id="task-list"></div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="view" id="view-history">
+    <div class="history-content">
+      <div class="history-toprow">
+        <div>
+          <div class="history-title">Completion History</div>
+          <div class="history-count" id="history-count">0 records</div>
+        </div>
+        <div class="history-filters">
+          <input class="filter-search" id="history-search" placeholder="Search history…" oninput="renderHistory()" style="width:180px">
+          <select class="filter-select" id="history-tech" onchange="renderHistory()">
+            <option value="">All Techs</option>
+          </select>
+          <button class="btn-export-sm" onclick="exportHistory()">⬇ Export CSV</button>
+        </div>
+      </div>
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Task ID</th><th>Asset</th><th>Dept</th><th>Completed By</th>
+            <th>Date</th><th>Actual Mins</th><th>Consumables</th><th>Notes</th>
+          </tr>
+        </thead>
+        <tbody id="history-tbody"></tbody>
+      </table>
+      <div id="history-empty" class="empty-state" style="display:none">
+        <h3>No completion records yet</h3>
+        <p>Complete tasks from the PM Tasks tab to build history</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div class="view" id="view-admin">
+    <div class="admin-content">
+      <!-- USER MANAGEMENT -->
+      <div class="suggest-section" style="border-color:var(--blue);margin-bottom:16px">
+        <div class="suggest-section-title" style="color:var(--blue)">
+          <span>👥</span><span>User Management</span>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:end">
+          <div style="flex:2;min-width:180px">
+            <label style="font-size:10px;font-weight:600;text-transform:uppercase;color:var(--text3);font-family:var(--font-mono);display:block;margin-bottom:3px">Email</label>
+            <input id="um-email" class="modal-input" placeholder="name@stumptowncoffee.com" style="margin:0">
+          </div>
+          <div style="flex:1;min-width:120px">
+            <label style="font-size:10px;font-weight:600;text-transform:uppercase;color:var(--text3);font-family:var(--font-mono);display:block;margin-bottom:3px">Display Name</label>
+            <input id="um-name" class="modal-input" placeholder="First Last" style="margin:0">
+          </div>
+          <div style="min-width:120px">
+            <label style="font-size:10px;font-weight:600;text-transform:uppercase;color:var(--text3);font-family:var(--font-mono);display:block;margin-bottom:3px">Role</label>
+            <select id="um-role" class="modal-select" style="margin:0">
+              <option value="Technician">Technician</option>
+              <option value="Lead">Lead</option>
+              <option value="Admin">Admin</option>
+            </select>
+          </div>
+          <div style="min-width:120px">
+            <label style="font-size:10px;font-weight:600;text-transform:uppercase;color:var(--text3);font-family:var(--font-mono);display:block;margin-bottom:3px">Department</label>
+            <select id="um-dept" class="modal-select" style="margin:0">
+              <option value="">—</option>
+              <option value="R">Roasting</option>
+              <option value="GH">Green Handling</option>
+              <option value="P">Production</option>
+              <option value="F">Facility</option>
+              <option value="CB">Cold Brew</option>
+              <option value="L">Logistics</option>
+              <option value="S">Safety</option>
+              <option value="Maintenance">Maintenance</option>
+            </select>
+          </div>
+          <button class="btn-primary" style="padding:8px 16px;white-space:nowrap" onclick="addPortalUser()">+ Add User</button>
+        </div>
+        <div id="um-list" style="overflow-x:auto"></div>
+      </div>
+
+      <div class="suggest-section" id="suggest-section" style="display:none">
+        <div class="suggest-section-title">
+          <span>💬</span><span>Team Suggestions</span>
+          <span class="nav-badge" id="suggest-count-badge" style="display:inline-flex;margin-left:4px">0</span>
+        </div>
+        <div id="suggestions-list"></div>
+      </div>
+      <div class="admin-toprow">
+        <div>
+          <div class="admin-title">Task Manager</div>
+          <div class="admin-count" id="admin-count">0 tasks</div>
+        </div>
+        <button class="btn-add" onclick="toggleAddForm()">+ Add Task</button>
+        <button class="btn-export" onclick="exportCSV()">⬇ Export CSV</button>
+        <input class="filter-search" id="admin-search" placeholder="Search…" oninput="renderAdmin()" style="margin-left:auto">
+        <select class="filter-select" id="admin-dept" onchange="renderAdmin()">
+          <option value="">All Depts</option>
+          <option>R</option><option>GH</option><option>P</option><option>F</option><option>CB</option>
+        </select>
+        <select class="filter-select" id="admin-fac" onchange="renderAdmin()">
+          <option value="">All Facilities</option>
+          <option>HQ</option><option>Creek</option>
+        </select>
+      </div>
+      <div class="add-form" id="add-form">
+        <div class="add-form-title">+ New PM Task</div>
+        <div class="add-form-grid">
+          <div class="add-form-field"><label class="add-form-label">ID</label><input class="add-form-input" id="nf-id" placeholder="PM-XXX"></div>
+          <div class="add-form-field"><label class="add-form-label">Facility</label><select class="add-form-input" id="nf-facility"><option>HQ</option><option>Creek</option></select></div>
+          <div class="add-form-field"><label class="add-form-label">Department</label><select class="add-form-input" id="nf-dept"><option>R</option><option>GH</option><option>P</option><option>F</option><option>CB</option></select></div>
+          <div class="add-form-field"><label class="add-form-label">Asset Name</label><input class="add-form-input" id="nf-asset" placeholder="e.g. Loring S35"></div>
+          <div class="add-form-field"><label class="add-form-label">Section</label><input class="add-form-input" id="nf-section"></div>
+          <div class="add-form-field"><label class="add-form-label">Component</label><input class="add-form-input" id="nf-component" placeholder="Optional"></div>
+          <div class="add-form-field"><label class="add-form-label">Frequency</label><select class="add-form-input" id="nf-freq"><option>Daily</option><option>Weekly</option><option>Monthly</option><option>Quarterly</option><option>Bi-Annual</option><option>Annual</option><option>2-Year</option><option>5-Year</option><option>As-Needed</option></select></div>
+          <div class="add-form-field"><label class="add-form-label">Priority</label><select class="add-form-input" id="nf-priority"><option>Critical</option><option>Important</option><option>Routine</option></select></div>
+          <div class="add-form-field"><label class="add-form-label">Est. Mins</label><input class="add-form-input" id="nf-mins" type="number" placeholder="30"></div>
+          <div class="add-form-field"><label class="add-form-label">LOTO Required?</label><select class="add-form-input" id="nf-loto"><option value="">No</option><option value="Yes">Yes</option></select></div>
+          <div class="add-form-field"><label class="add-form-label">Last Completed</label><input class="add-form-input" id="nf-last" type="date"></div>
+          <div class="add-form-field" style="grid-column:span 2"><label class="add-form-label">Instruction</label><input class="add-form-input" id="nf-instruction" style="width:100%" placeholder="Describe the PM task…"></div>
+          <div class="add-form-field" style="grid-column:span 2"><label class="add-form-label">Manual / SOP Link</label><input class="add-form-input" id="nf-manual-url" style="width:100%" placeholder="https://drive.google.com/… or other URL"></div>
+        </div>
+        <div class="add-form-row">
+          <button class="btn-primary" style="max-width:140px" onclick="submitAddForm()">Add Task</button>
+          <button class="btn-secondary" onclick="toggleAddForm()">Cancel</button>
+        </div>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead><tr>
+            <th>ID</th><th>Fac</th><th>Dept</th><th>Asset</th><th>Section</th>
+            <th>Priority</th><th>Freq</th><th>Next Due</th><th>Mins</th>
+            <th style="min-width:280px">Instruction</th><th>LOTO</th><th>Manual/SOP</th><th class="actions-th">Actions</th>
+          </tr></thead>
+          <tbody id="admin-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- WORK ORDERS -->
+  <div class="view" id="view-workorders">
+    <div class="admin-content">
+      <div class="admin-toprow">
+        <div>
+          <div class="admin-title">Work Orders</div>
+          <div class="admin-count" id="wo-count-label">—</div>
+        </div>
+        <button class="btn-primary" onclick="openNewWO()">+ New Work Order</button>
+      </div>
+      <div class="wo-stats" id="wo-stats"></div>
+      <div class="wo-filters" id="wo-filters">
+        <span class="wo-pill active" data-value="all" onclick="setWOFilter(this)">All</span>
+        <span class="wo-pill" data-value="Open" onclick="setWOFilter(this)">Open</span>
+        <span class="wo-pill" data-value="Approved" onclick="setWOFilter(this)">Approved</span>
+        <span class="wo-pill" data-value="In Progress" onclick="setWOFilter(this)">In Progress</span>
+        <span class="wo-pill" data-value="On Hold" onclick="setWOFilter(this)">On Hold</span>
+        <span class="wo-pill" data-value="Complete" onclick="setWOFilter(this)">Complete</span>
+        <span class="wo-pill" data-value="Cancelled" onclick="setWOFilter(this)">Cancelled</span>
+        <input type="text" class="wo-search" placeholder="🔍 Search WOs..." oninput="woSearch=this.value;renderWOTable()">
+      </div>
+      <div class="wo-adv-filters" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center;">
+        <select id="wo-f-priority" class="wo-filter-sel" onchange="renderWOTable()"><option value="">All Priorities</option><option value="Critical">Critical</option><option value="High">High</option><option value="Medium">Medium</option><option value="Low">Low</option></select>
+        <select id="wo-f-dept" class="wo-filter-sel" onchange="renderWOTable()"><option value="">All Departments</option><option value="R">Roasting</option><option value="GH">Green Handling</option><option value="P">Production</option><option value="F">Facility</option><option value="CB">Cold Brew</option><option value="L">Logistics</option><option value="S">Safety</option><option value="Maintenance">Maintenance</option></select>
+        <select id="wo-f-facility" class="wo-filter-sel" onchange="renderWOTable()"><option value="">All Facilities</option><option value="HQ">HQ</option><option value="Creek">Creek</option></select>
+        <label style="font-size:11px;color:var(--text3);font-family:var(--font-mono);">From</label>
+        <input type="date" id="wo-f-date-from" class="wo-filter-sel" onchange="renderWOTable()">
+        <label style="font-size:11px;color:var(--text3);font-family:var(--font-mono);">To</label>
+        <input type="date" id="wo-f-date-to" class="wo-filter-sel" onchange="renderWOTable()">
+        <button class="wo-pill" onclick="clearWOFilters()" style="margin-left:auto;font-size:11px;">✕ Clear Filters</button>
+      </div>
+      <table class="wo-table">
+        <thead><tr><th>WO #</th><th>Priority</th><th>Status</th><th>Equipment</th><th>Dept</th><th>Assigned</th><th>Submitted</th></tr></thead>
+        <tbody id="wo-tbody"></tbody>
+      </table>
+      <div id="wo-empty" class="empty-state" style="display:none"><h3>No work orders</h3><p>Click "+ New Work Order" to create one</p></div>
+    </div>
+  </div>
+
+  <!-- REPORTS -->
+  <div class="view" id="view-reports">
+    <div class="admin-content">
+      <div class="admin-toprow">
+        <div>
+          <div class="admin-title">PM Reports</div>
+          <div class="admin-count" id="report-date-range">—</div>
+        </div>
+        <select class="filter-select" id="report-dept" onchange="renderReports()">
+          <option value="">All Departments</option>
+          <option value="R">Roasting</option>
+          <option value="GH">Green Handling</option>
+          <option value="P">Production</option>
+          <option value="F">Facility</option>
+          <option value="CB">Cold Brew</option>
+          <option value="L">Logistics</option>
+          <option value="S">Safety</option>
+        </select>
+        <select class="filter-select" id="report-period" onchange="renderReports()">
+          <option value="30">Last 30 Days</option>
+          <option value="60">Last 60 Days</option>
+          <option value="90">Last 90 Days</option>
+          <option value="365">Last 12 Months</option>
+          <option value="0">All Time</option>
+        </select>
+        <button class="btn-export" onclick="exportReport()">⬇ Export Report CSV</button>
+      </div>
+
+      <!-- DEPT TIME SUMMARY -->
+      <div class="suggest-section" style="border-color:var(--amber);margin-bottom:16px">
+        <div class="suggest-section-title" style="color:var(--amber)">
+          <span>⏱</span><span>PM Time by Department</span>
+        </div>
+        <div id="report-dept-time" style="overflow-x:auto"></div>
+      </div>
+
+      <!-- LOTO SUMMARY -->
+      <div class="suggest-section" style="border-color:var(--purple);margin-bottom:16px">
+        <div class="suggest-section-title" style="color:var(--purple)">
+          <span>🔒</span><span>LOTO / Downtime Requirements</span>
+        </div>
+        <div id="report-loto" style="overflow-x:auto"></div>
+      </div>
+
+      <!-- OBSTACLE LOG -->
+      <div class="suggest-section" style="border-color:var(--red);margin-bottom:16px">
+        <div class="suggest-section-title" style="color:var(--red)">
+          <span>⚠</span><span>Obstacle Reports</span>
+          <span class="nav-badge" id="obstacle-count-badge" style="display:inline-flex;margin-left:4px;background:var(--red)">0</span>
+        </div>
+        <div id="report-obstacles"></div>
+      </div>
+
+      <!-- COMPLIANCE OVERVIEW -->
+      <div class="suggest-section" style="border-color:var(--green);margin-bottom:16px">
+        <div class="suggest-section-title" style="color:var(--green)">
+          <span>✓</span><span>Compliance Overview</span>
+        </div>
+        <div id="report-compliance" style="overflow-x:auto"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPLETE MODAL -->
+<div class="modal-overlay" id="complete-modal">
+  <div class="modal">
+    <div class="modal-title">Mark Task Complete</div>
+    <div class="modal-sub" id="modal-task-id">PM-XXX</div>
+    <div class="modal-instruction" id="modal-instruction"></div>
+    <div class="modal-grid">
+      <div>
+        <label class="modal-label">Completed By</label>
+        <input class="modal-input" id="modal-tech" placeholder="Your name" readonly style="opacity:.7">
+      </div>
+      <div>
+        <label class="modal-label">Date Completed</label>
+        <input class="modal-input" id="modal-date" type="date">
+      </div>
+      <div>
+        <label class="modal-label">Actual Time (mins)</label>
+        <input class="modal-input" id="modal-actual-mins" type="number" placeholder="e.g. 45">
+      </div>
+      <div>
+        <label class="modal-label">Estimated Time</label>
+        <input class="modal-input" id="modal-est-mins" disabled style="opacity:.5">
+      </div>
+    </div>
+    <label class="modal-label">Consumables Used <span style="color:var(--text3);font-weight:400;text-transform:none;font-family:var(--font-sans)">(part #, qty, description)</span></label>
+    <div id="consumable-rows">
+      <div class="consumable-row">
+        <input class="consumable-input" placeholder="e.g. TPG-J0223 — Gripper Rubber × 2">
+        <button class="btn-rm-row" onclick="removeConsumable(this)">✕</button>
+      </div>
+    </div>
+    <button class="btn-add-row" onclick="addConsumable()" style="margin-top:6px;font-size:11px">+ Add Item</button>
+    <label class="modal-label">Notes / Observations</label>
+    <textarea class="modal-textarea" id="modal-notes" placeholder="Any issues found, observations, follow-up needed…"></textarea>
+    <div class="modal-row">
+      <button class="btn-primary" onclick="confirmComplete()">✓ Mark Complete</button>
+      <button class="btn-secondary" onclick="closeModal('complete-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUGGEST MODAL -->
+<div class="modal-overlay" id="suggest-modal">
+  <div class="modal">
+    <div class="modal-title">Suggest a Change</div>
+    <div class="modal-sub" id="suggest-task-id">PM-XXX</div>
+    <div class="modal-instruction" id="suggest-instruction"></div>
+    <label class="modal-label">Type of Suggestion</label>
+    <select class="modal-select" id="suggest-type">
+      <option value="Correction">Correction — fix an error in this task</option>
+      <option value="Interval">Interval — change PM frequency</option>
+      <option value="Safety">Safety — LOTO or safety concern</option>
+      <option value="Parts">Parts — consumable / part info</option>
+      <option value="Other">Other — general feedback</option>
+    </select>
+    <label class="modal-label">Your Suggestion</label>
+    <textarea class="modal-textarea" id="suggest-body" placeholder="Describe what should change and why…" style="min-height:100px"></textarea>
+    <div class="modal-row">
+      <button class="btn-primary purple" onclick="submitSuggestion()">Submit Suggestion</button>
+      <button class="btn-secondary" onclick="closeModal('suggest-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<!-- OBSTACLE MODAL -->
+<div class="modal-overlay" id="obstacle-modal">
+  <div class="modal">
+    <div class="modal-title" style="color:var(--red)">⚠ Report Obstacle</div>
+    <div class="modal-sub" id="obstacle-task-id">PM-XXX</div>
+    <div class="modal-instruction" id="obstacle-instruction"></div>
+    <label class="modal-label">Reason</label>
+    <select class="modal-select" id="obstacle-reason">
+      <option value="Schedule Change">Schedule Change — production schedule shifted</option>
+      <option value="Production Demand">Production Demand — line couldn't be released</option>
+      <option value="Equipment In Use">Equipment In Use — asset running, no downtime window</option>
+      <option value="Parts Unavailable">Parts Unavailable — waiting on parts or consumables</option>
+      <option value="Staffing">Staffing — not enough coverage to perform task</option>
+      <option value="Other">Other</option>
+    </select>
+    <label class="modal-label">Blocking Department</label>
+    <select class="modal-select" id="obstacle-dept">
+      <option value="">N/A</option>
+      <option value="R">Roasting</option>
+      <option value="GH">Green Handling</option>
+      <option value="P">Production</option>
+      <option value="F">Facility</option>
+      <option value="CB">Cold Brew</option>
+      <option value="L">Logistics</option>
+      <option value="S">Safety</option>
+      <option value="Planning">Planning / Scheduling</option>
+    </select>
+    <label class="modal-label">Description</label>
+    <textarea class="modal-textarea" id="obstacle-body" placeholder="What happened? What window was needed? Any details that help in planning meetings…" style="min-height:100px"></textarea>
+    <div class="modal-row">
+      <button class="btn-primary" style="background:var(--red)" onclick="submitObstacle()">Submit Obstacle Report</button>
+      <button class="btn-secondary" onclick="closeModal('obstacle-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- WORK ORDER MODAL -->
+<div class="modal-overlay" id="wo-modal">
+  <div class="modal">
+    <div class="modal-title">New Work Order</div>
+    <div class="modal-grid">
+      <div><label class="modal-label">Facility</label>
+        <select class="modal-select" id="wo-facility"><option value="HQ">HQ</option><option value="Creek">Creek</option></select></div>
+      <div><label class="modal-label">Department</label>
+        <select class="modal-select" id="wo-dept"><option value="R">Roasting</option><option value="GH">Green Handling</option><option value="P">Production</option><option value="F">Facility</option><option value="CB">Cold Brew</option><option value="L">Logistics</option><option value="S">Safety</option><option value="Maintenance">Maintenance</option></select></div>
+    </div>
+    <label class="modal-label">Equipment / Asset</label>
+    <input class="modal-input" id="wo-asset" placeholder="e.g. Probat Roaster #2, Cold Brew Tank A">
+    <div class="modal-grid">
+      <div><label class="modal-label">Priority</label>
+        <select class="modal-select" id="wo-priority"><option value="Medium">Medium</option><option value="Low">Low</option><option value="High">High</option><option value="Critical">Critical</option></select></div>
+      <div><label class="modal-label">Source PM Task (optional)</label>
+        <input class="modal-input" id="wo-source-pm" placeholder="e.g. PM-T001"></div>
+    </div>
+    <label class="modal-label">Description</label>
+    <textarea class="modal-textarea" id="wo-desc" placeholder="Describe the issue — what needs repair or attention?" style="min-height:80px"></textarea>
+    <div class="modal-row">
+      <button class="btn-primary" onclick="createWO()">Create Work Order</button>
+      <button class="btn-secondary" onclick="closeModal('wo-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// SUPABASE CONFIG
+// ============================================================
+let SUPABASE_URL = '';
+let SUPABASE_KEY = '';
+
+async function supaFetch(path, opts = {}) {
+  const url = SUPABASE_URL + '/rest/v1' + path;
+  const headers = {
+    'apikey': SUPABASE_KEY,
+    'Authorization': 'Bearer ' + SUPABASE_KEY,
+    'Content-Type': 'application/json',
+    'Prefer': opts.prefer || 'return=representation',
+    ...opts.headers
+  };
+  const res = await fetch(url, { method: opts.method || 'GET', headers, body: opts.body });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(err);
+  }
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+async function saveConfig() {
+  const url = document.getElementById('cfg-url').value.trim().replace(/\/$/, '');
+  const key = document.getElementById('cfg-key').value.trim();
+  const status = document.getElementById('config-status');
+  if (!url || !key) { showConfigStatus('Please fill in both fields', 'error'); return; }
+  SUPABASE_URL = url; SUPABASE_KEY = key;
+  showConfigStatus('Testing connection…', 'ok');
+  try {
+    const res = await fetch(url + '/rest/v1/tasks?limit=1', {
+      headers: { 'apikey': key, 'Authorization': 'Bearer ' + key }
+    });
+    if (res.status === 200 || res.status === 206) {
+      localStorage.setItem('spm_url', url);
+      localStorage.setItem('spm_key', key);
+      showConfigStatus('Connected! Loading portal…', 'ok');
+      await loadPortalUsers();
+      setTimeout(() => { document.getElementById('config-screen').style.display = 'none'; document.getElementById('login-screen').style.display = 'flex'; }, 800);
+    } else if (res.status === 404) {
+      showConfigStatus('URL looks wrong — double-check your Project URL', 'error');
+    } else {
+      showConfigStatus('Connection failed ('+res.status+') — check your keys', 'error');
+    }
+  } catch(e) {
+    showConfigStatus('Could not reach Supabase — check URL format', 'error');
+  }
+}
+
+function showConfigStatus(msg, type) {
+  const el = document.getElementById('config-status');
+  el.textContent = msg;
+  el.className = 'config-status ' + type;
+  el.style.display = 'block';
+}
+
+// ============================================================
+// USER ROLES (database-driven — managed in Admin tab)
+// ============================================================
+let portalUsers = {};  // email -> {role, display_name, department}
+
+async function loadPortalUsers() {
+  try {
+    const users = await supaFetch('/portal_users?active=eq.true&select=*');
+    portalUsers = {};
+    for (const u of (users || [])) {
+      portalUsers[u.email.toLowerCase()] = u;
+    }
+  } catch(e) { console.error('Could not load portal users:', e); portalUsers = {}; }
+}
+
+function getUserRole(email) {
+  const e = (email || '').trim().toLowerCase();
+  const u = portalUsers[e];
+  if (u) return u.role;
+  return null;  // not in system
+}
+
+function isAdminEmail(email) {
+  return getUserRole(email) === 'Admin';
+}
+
+function previewRole() {
+  const email = (document.getElementById('login-email').value || '').trim().toLowerCase();
+  const display = document.getElementById('login-role-display');
+  const u = portalUsers[email];
+  if (u) {
+    const labels = { Admin: 'Admin / Manager', Lead: 'Department Lead', Technician: 'Technician' };
+    display.textContent = labels[u.role] || u.role;
+    display.style.color = u.role === 'Admin' ? 'var(--amber-light)' : u.role === 'Lead' ? 'var(--green)' : 'var(--text2)';
+    display.style.borderColor = u.role === 'Admin' ? 'var(--amber)' : u.role === 'Lead' ? 'var(--green)' : 'var(--border)';
+  } else if (email.length > 3) {
+    display.textContent = 'Not registered — contact an admin';
+    display.style.color = 'var(--red)';
+    display.style.borderColor = 'var(--red)';
+  } else {
+    display.textContent = '—';
+    display.style.color = 'var(--text2)';
+    display.style.borderColor = 'var(--border)';
+  }
+}
+
+// ============================================================
+// STATE
+// ============================================================
+const FREQ_DAYS = {Daily:1,Weekly:7,Monthly:30,Quarterly:91,'Bi-Annual':182,Annual:365,'1.5-Year':548,'2-Year':730,'5-Year':1825};
+const DEPT_NAMES = {R:'Roasting',GH:'Green Handling',P:'Production',F:'Facility',CB:'Cold Brew',L:'Logistics',S:'Safety',Maintenance:'Maintenance'};
+const DEPT_COLORS = {R:'#c94040',GH:'#4a9e6c',P:'#4a7fb5',F:'#c9a840',CB:'#d4882a',L:'#8a6ab5',S:'#e74c3c'};
+
+let tasks = [];
+let completionHistory = [];
+let suggestions = [];
+let completedIds = new Set();
+let currentUser = null;
+let activeFilters = {};
+let pendingCompleteId = null;
+let pendingSuggestId = null;
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('load', async () => {
+  const savedUrl = localStorage.getItem('spm_url');
+  const savedKey = localStorage.getItem('spm_key');
+  if (savedUrl && savedKey) {
+    SUPABASE_URL = savedUrl; SUPABASE_KEY = savedKey;
+    document.getElementById('config-screen').style.display = 'none';
+    await loadPortalUsers();
+    document.getElementById('login-screen').style.display = 'flex';
+  }
+});
+
+// ============================================================
+// AUTH
+// ============================================================
+async function doLogin() {
+  const email = (document.getElementById('login-email').value || '').trim().toLowerCase();
+  if (!email || !email.includes('@')) { showToast('Enter a valid email', 'error'); return; }
+  const role = getUserRole(email);
+  if (!role) { showToast('Email not registered — contact an admin to get access', 'error'); return; }
+  const isAdmin = role === 'Admin';
+  const isLead = role === 'Lead';
+  const initials = email.split('@')[0].split(/[.\-_]/).map(p=>p[0]||'').join('').toUpperCase().slice(0,2) || 'U?';
+  const colors = ['#d4882a','#4a9e6c','#4a7fb5','#c9a840','#8a6ab5'];
+  const color = colors[email.charCodeAt(0) % colors.length];
+  currentUser = { email, role, initials, color };
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('top-avatar').textContent = initials;
+  document.getElementById('top-avatar').style.background = color;
+  document.getElementById('top-name').textContent = portalUsers[email]?.display_name || email.split('@')[0].replace(/[.\-_]/g,' ');
+  document.getElementById('top-role').textContent = role;
+  document.getElementById('modal-tech').value = email;
+  if (isAdmin) { document.getElementById('nav-admin').style.display = 'inline-flex'; document.getElementById('nav-reports').style.display = 'inline-flex'; }
+  if (isLead) { document.getElementById('nav-reports').style.display = 'inline-flex'; }
+  document.getElementById('dash-date').textContent = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  loadAllData();
+}
+
+function doLogout() {
+  currentUser = null; tasks = []; completionHistory = []; suggestions = []; completedIds = new Set();
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('nav-admin').style.display = 'none';
+  document.getElementById('nav-reports').style.display = 'none';
+}
+
+// ============================================================
+// DATA LOADING
+// ============================================================
+async function loadAllData() {
+  setSyncState('syncing', 'loading…');
+  try {
+    const [t, c, s] = await Promise.all([
+      supaFetch('/tasks?order=department,asset_name&limit=1000'),
+      supaFetch('/completions?order=created_at.desc&limit=2000'),
+      supaFetch('/suggestions?order=created_at.desc&limit=500')
+    ]);
+    tasks = t || [];
+    completionHistory = c || [];
+    suggestions = s || [];
+    completedIds = new Set();
+    // Mark tasks completed based on latest completion within their interval
+    completionHistory.forEach(r => completedIds.add(r.task_id));
+    setSyncState('live', 'live');
+    renderDashboard(); applyFilters(); updateSuggestBadge();
+    populateHistoryTechFilter();
+    await loadWOs();
+  } catch(e) {
+    setSyncState('error', 'offline');
+    showToast('Could not load data: ' + e.message, 'error');
+  }
+}
+
+function setSyncState(state, label) {
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  dot.className = 'sync-dot ' + (state !== 'live' ? state : '');
+  lbl.textContent = label;
+}
+
+// ============================================================
+// NAV
+// ============================================================
+function switchView(name, btn) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (name === 'admin') renderAdmin();
+  if (name === 'history') renderHistory();
+  if (name === 'reports') renderReports();
+  if (name === 'workorders') renderWOTable();
+}
+
+// ============================================================
+// DATE UTILS
+// ============================================================
+function parseDate(s) { return s ? new Date(s + 'T00:00:00') : null; }
+function daysUntil(s) { const d = parseDate(s); return d ? Math.floor((d - new Date()) / 86400000) : null; }
+function fmtDate(s) {
+  if (!s) return '—';
+  return parseDate(s).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'});
+}
+function fmtDateTime(ts) {
+  return new Date(ts).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit',hour:'numeric',minute:'2-digit'});
+}
+function calcNextDue(last, freq) {
+  if (!last || !FREQ_DAYS[freq]) return '';
+  const d = new Date(last + 'T00:00:00');
+  d.setDate(d.getDate() + FREQ_DAYS[freq]);
+  return d.toISOString().slice(0,10);
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+function renderDashboard() {
+  const overdue = tasks.filter(t => t.next_due && daysUntil(t.next_due) < 0);
+  const dueSoon = tasks.filter(t => t.next_due && daysUntil(t.next_due) >= 0 && daysUntil(t.next_due) <= 7);
+  const critical = tasks.filter(t => t.priority === 'Critical');
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Total Tasks</div><div class="stat-value">${tasks.length}</div><div class="stat-sub">PM tasks loaded</div></div>
+    <div class="stat-card red"><div class="stat-label">Overdue</div><div class="stat-value">${overdue.length}</div><div class="stat-sub">past due date</div></div>
+    <div class="stat-card amber"><div class="stat-label">Due This Week</div><div class="stat-value">${dueSoon.length}</div><div class="stat-sub">within 7 days</div></div>
+    <div class="stat-card"><div class="stat-label">Critical Tasks</div><div class="stat-value" style="color:var(--red)">${critical.length}</div><div class="stat-sub">total critical</div></div>
+    <div class="stat-card green"><div class="stat-label">Completions</div><div class="stat-value">${completionHistory.length}</div><div class="stat-sub">logged in database</div></div>
+  `;
+  const depts = {};
+  tasks.forEach(t => { depts[t.department] = (depts[t.department]||0)+1; });
+  const maxD = Math.max(...Object.values(depts));
+  document.getElementById('dept-chart').innerHTML = Object.entries(depts).sort((a,b)=>b[1]-a[1]).map(([d,c])=>`
+    <div class="bar-row"><div class="bar-label">${DEPT_NAMES[d]||d}</div>
+    <div class="bar-track"><div class="bar-fill" style="width:${(c/maxD*100).toFixed(0)}%;background:${DEPT_COLORS[d]||'#666'}"></div></div>
+    <div class="bar-count">${c}</div></div>`).join('');
+  const prios = {Critical:0,Important:0,Routine:0};
+  tasks.forEach(t => { if(prios[t.priority]!==undefined) prios[t.priority]++; });
+  const maxP = Math.max(...Object.values(prios));
+  const pc = {Critical:'#c94040',Important:'#d4882a',Routine:'#5a6262'};
+  document.getElementById('priority-chart').innerHTML = Object.entries(prios).map(([p,c])=>`
+    <div class="bar-row"><div class="bar-label">${p}</div>
+    <div class="bar-track"><div class="bar-fill" style="width:${(c/maxP*100).toFixed(0)}%;background:${pc[p]}"></div></div>
+    <div class="bar-count">${c}</div></div>`).join('');
+  const freqs = {};
+  tasks.forEach(t=>{ if(t.frequency) freqs[t.frequency]=(freqs[t.frequency]||0)+1; });
+  const maxF = Math.max(...Object.values(freqs));
+  const FREQ_ORDER = {Daily:0,Weekly:1,Monthly:2,Quarterly:3,'Bi-Annual':4,Annual:5,'1.5-Year':6,'2-Year':7,'5-Year':8,'As-Needed':9};
+  document.getElementById('freq-chart').innerHTML = Object.entries(freqs).sort((a,b)=>(FREQ_ORDER[a[0]]||99)-(FREQ_ORDER[b[0]]||99)).map(([f,c])=>`
+    <div class="bar-row"><div class="bar-label">${f}</div>
+    <div class="bar-track"><div class="bar-fill" style="width:${(c/maxF*100).toFixed(0)}%;background:var(--amber)"></div></div>
+    <div class="bar-count">${c}</div></div>`).join('');
+  const ol = document.getElementById('overdue-list');
+  if (!overdue.length) { ol.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px">No overdue tasks ✓</div>'; }
+  else ol.innerHTML = overdue.sort((a,b)=>(a.next_due||'')<(b.next_due||'')?-1:1).slice(0,20).map(t=>`
+    <div class="overdue-item">
+      <div><div class="overdue-name">${t.asset_name} — ${t.section||t.component||'General'}</div>
+      <div class="overdue-asset">${t.id} · ${t.department} · ${t.priority}</div></div>
+      <div class="overdue-date">${fmtDate(t.next_due)}</div>
+    </div>`).join('');
+}
+
+// ============================================================
+// FILTERS
+// ============================================================
+function togglePill(key) {
+  const el = document.getElementById('pill-'+key);
+  activeFilters[key] ? (delete activeFilters[key], el.classList.remove('active')) : (activeFilters[key]=true, el.classList.add('active'));
+  applyFilters();
+}
+function clearFilters() {
+  activeFilters = {};
+  ['task-search','filter-facility','filter-dept','filter-freq'].forEach(id => document.getElementById(id).value='');
+  document.querySelectorAll('.filter-pill').forEach(p=>p.classList.remove('active'));
+  applyFilters();
+}
+function applyFilters() {
+  const search = document.getElementById('task-search').value.toLowerCase();
+  const facility = document.getElementById('filter-facility').value;
+  const dept = document.getElementById('filter-dept').value;
+  const freq = document.getElementById('filter-freq').value;
+  const prioF = ['critical','important','routine'].filter(p=>activeFilters[p]);
+  const overdueOnly = activeFilters['overdue'];
+  let filtered = tasks.filter(t => {
+    if (facility && t.facility!==facility) return false;
+    if (dept && t.department!==dept) return false;
+    if (freq && t.frequency!==freq) return false;
+    if (prioF.length && !prioF.includes(t.priority.toLowerCase())) return false;
+    if (overdueOnly && !(t.next_due && daysUntil(t.next_due)<0)) return false;
+    if (search) { const hay=[t.id,t.asset_name,t.section,t.component,t.instruction,t.department,t.facility].join(' ').toLowerCase(); if(!hay.includes(search)) return false; }
+    return true;
+  });
+  document.getElementById('filter-count').textContent = filtered.length + ' tasks';
+  renderTaskList(filtered);
+}
+
+// ============================================================
+// TASK LIST
+// ============================================================
+function renderTaskList(filtered) {
+  const container = document.getElementById('task-list');
+  if (!filtered.length) { container.innerHTML = '<div class="empty-state"><h3>No tasks found</h3><p>Adjust your filters</p></div>'; return; }
+  const groups = {};
+  filtered.forEach(t => { const k = t.facility+'|'+t.department+'|'+t.asset_name; (groups[k]=groups[k]||[]).push(t); });
+  container.innerHTML = Object.entries(groups).sort((a,b)=>{ const[af,ad,aa]=a[0].split('|');const[bf,bd,ba]=b[0].split('|');return ad.localeCompare(bd)||aa.localeCompare(ba); }).map(([key,gt])=>{
+    const [fac,dept,asset] = key.split('|');
+    const gid = 'g-'+ btoa(unescape(encodeURIComponent(key))).replace(/[^a-z0-9]/gi,'').slice(0,20);
+    const rows = gt.sort((a,b)=>(a.priority==='Critical'?0:a.priority==='Important'?1:2)-(b.priority==='Critical'?0:b.priority==='Important'?1:2)).map(t=>{
+      const days = daysUntil(t.next_due);
+      const done = completedIds.has(t.id);
+      const cls = ['task-row', done?'completed':'', (!done&&days!==null&&days<0)?'overdue':'', (!done&&days!==null&&days>=0&&days<=7)?'due-soon':''].join(' ');
+      const badge = t.priority==='Critical'?'badge-critical':t.priority==='Important'?'badge-important':'badge-routine';
+      const loto = t.loto==='Yes'?'<span class="loto-badge yes">LOTO</span>':'<span style="color:var(--text3);font-size:11px;font-family:var(--font-mono)">—</span>';
+      const action = done
+        ? `<button class="btn-complete done" disabled>✓ Done</button>`
+        : `<button class="btn-complete" onclick="openCompleteModal('${t.id}')">Complete</button>`;
+      return `<div class="${cls}">
+        <div class="task-id">${t.id}</div>
+        <div class="task-instruction">
+          <div class="task-instruction-main">${(t.instruction||'—').substring(0,80)}${(t.instruction||'').length>80?'…':''}</div>
+          ${t.section?`<div class="task-instruction-sub">${t.section}${t.component?' · '+t.component:''}</div>`:''}
+          ${t.manual_url?`<a href="${t.manual_url}" target="_blank" style="font-size:11px;color:var(--blue);text-decoration:none;font-family:var(--font-mono)">📄 Manual / SOP</a>`:''}
+        </div>
+        <div class="task-freq">${t.frequency||'—'}</div>
+        <div><span class="badge ${badge}">${t.priority}</span></div>
+        <div>${loto}</div>
+        <div class="task-due">${t.next_due?fmtDate(t.next_due):'—'}</div>
+        <div class="task-actions">${action}<button class="btn-blocked" onclick="openObstacleModal('${t.id}')" title="Report obstacle">⚠</button><button class="btn-suggest" onclick="openSuggestModal('${t.id}')" title="Suggest a change">✏</button></div>
+      </div>`;
+    }).join('');
+    return `<div class="asset-group" id="${gid}">
+      <div class="asset-header" onclick="toggleGroup('${gid}')">
+        <span class="asset-chevron open" id="chev-${gid}">▶</span>
+        <span class="asset-name">${asset}</span>
+        <span class="asset-dept">${DEPT_NAMES[dept]||dept}</span>
+        <span class="asset-fac">${fac}</span>
+        <span class="asset-task-count">${gt.length} task${gt.length!==1?'s':''}</span>
+      </div>
+      <div id="rows-${gid}">${rows}</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleGroup(gid) {
+  const rows = document.getElementById('rows-'+gid);
+  const chev = document.getElementById('chev-'+gid);
+  const open = rows.style.display !== 'none';
+  rows.style.display = open ? 'none' : '';
+  chev.classList.toggle('open', !open);
+}
+
+// ============================================================
+// COMPLETE MODAL
+// ============================================================
+function openCompleteModal(id) {
+  const t = tasks.find(x=>x.id===id); if(!t) return;
+  pendingCompleteId = id;
+  document.getElementById('modal-task-id').textContent = id + ' · ' + t.asset_name;
+  document.getElementById('modal-instruction').textContent = t.instruction || '';
+  document.getElementById('modal-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('modal-actual-mins').value = '';
+  document.getElementById('modal-est-mins').value = t.est_mins || '';
+  document.getElementById('modal-notes').value = '';
+  document.getElementById('consumable-rows').innerHTML = `<div class="consumable-row"><input class="consumable-input" placeholder="e.g. part# / description / qty"><button class="btn-rm-row" onclick="removeConsumable(this)">✕</button></div>`;
+  document.getElementById('complete-modal').classList.add('open');
+}
+
+function addConsumable() {
+  const div = document.createElement('div');
+  div.className = 'consumable-row';
+  div.innerHTML = `<input class="consumable-input" placeholder="part# / description / qty"><button class="btn-rm-row" onclick="removeConsumable(this)">✕</button>`;
+  document.getElementById('consumable-rows').appendChild(div);
+}
+
+function removeConsumable(btn) {
+  const rows = document.getElementById('consumable-rows');
+  if (rows.children.length > 1) btn.parentElement.remove();
+}
+
+async function confirmComplete() {
+  const id = pendingCompleteId; if(!id) return;
+  const t = tasks.find(x=>x.id===id); if(!t) return;
+  const date = document.getElementById('modal-date').value;
+  const actualMins = parseInt(document.getElementById('modal-actual-mins').value)||null;
+  const notes = document.getElementById('modal-notes').value.trim();
+  const consumables = Array.from(document.querySelectorAll('#consumable-rows .consumable-input'))
+    .map(i=>i.value.trim()).filter(Boolean);
+  if (!date) { showToast('Please enter a completion date','error'); return; }
+  const record = {
+    task_id: id,
+    asset_name: t.asset_name,
+    department: t.department,
+    facility: t.facility,
+    completed_by: currentUser.email,
+    completed_date: date,
+    actual_mins: actualMins,
+    est_mins: parseInt(t.est_mins)||null,
+    consumables: consumables,
+    notes: notes || null
+  };
+  const nextDue = calcNextDue(date, t.frequency);
+  setSyncState('syncing','saving…');
+  try {
+    await supaFetch('/completions', { method:'POST', body: JSON.stringify(record) });
+    // Update next_due
+    if (nextDue) {
+      await supaFetch('/tasks?id=eq.'+encodeURIComponent(id), {
+        method:'PATCH', prefer:'return=minimal',
+        body: JSON.stringify({ last_completed: date, next_due: nextDue })
+      });
+      const idx = tasks.findIndex(x=>x.id===id);
+      if(idx>=0){ tasks[idx].last_completed=date; tasks[idx].next_due=nextDue; }
+    }
+    // Auto-update est_mins using trimmed average (if actual was provided)
+    if (actualMins) {
+      const allActuals = completionHistory
+        .filter(c => c.task_id === id && c.actual_mins)
+        .map(c => c.actual_mins);
+      allActuals.push(actualMins); // include this new one
+      let newEst;
+      if (allActuals.length <= 2) {
+        // Not enough data to trim — just average what we have
+        newEst = Math.round(allActuals.reduce((a,b)=>a+b,0) / allActuals.length);
+      } else {
+        // Trimmed average: drop highest and lowest, average the rest
+        const sorted = [...allActuals].sort((a,b)=>a-b);
+        const trimmed = sorted.slice(1, sorted.length - 1);
+        newEst = Math.round(trimmed.reduce((a,b)=>a+b,0) / trimmed.length);
+      }
+      const oldEst = parseInt(t.est_mins) || 0;
+      if (newEst !== oldEst) {
+        await supaFetch('/tasks?id=eq.'+encodeURIComponent(id), {
+          method:'PATCH', prefer:'return=minimal',
+          body: JSON.stringify({ est_mins: newEst })
+        });
+        const idx = tasks.findIndex(x=>x.id===id);
+        if(idx>=0) tasks[idx].est_mins = newEst;
+        showToast('Est. time updated: ' + oldEst + ' → ' + newEst + ' mins (' + allActuals.length + ' completions)', 'info');
+      }
+    }
+    completionHistory.unshift({...record, id:'temp-'+Date.now(), created_at:new Date().toISOString()});
+    completedIds.add(id);
+    closeModal('complete-modal');
+    setSyncState('live','live');
+    showToast('✓ '+id+' marked complete','success');
+    applyFilters(); renderDashboard();
+  } catch(e) {
+    setSyncState('error','error');
+    showToast('Save failed: '+e.message,'error');
+  }
+}
+
+// ============================================================
+// SUGGEST MODAL
+// ============================================================
+function openSuggestModal(id) {
+  const t = tasks.find(x=>x.id===id); if(!t) return;
+  pendingSuggestId = id;
+  document.getElementById('suggest-task-id').textContent = id + ' · ' + t.asset_name;
+  document.getElementById('suggest-instruction').textContent = t.instruction || '';
+  document.getElementById('suggest-body').value = '';
+  document.getElementById('suggest-modal').classList.add('open');
+}
+
+async function submitSuggestion() {
+  const id = pendingSuggestId; if(!id) return;
+  const t = tasks.find(x=>x.id===id);
+  const body = document.getElementById('suggest-body').value.trim();
+  const type = document.getElementById('suggest-type').value;
+  if (!body) { showToast('Please describe your suggestion','error'); return; }
+  const rec = { task_id: id, asset_name: t?.asset_name||'', from_email: currentUser.email, type, body, status:'pending' };
+  try {
+    await supaFetch('/suggestions', { method:'POST', body: JSON.stringify(rec) });
+    suggestions.unshift({...rec, id:'temp-'+Date.now(), created_at:new Date().toISOString()});
+    closeModal('suggest-modal');
+    showToast('Suggestion submitted','success');
+    updateSuggestBadge();
+  } catch(e) {
+    showToast('Failed to submit: '+e.message,'error');
+  }
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ============================================================
+// HISTORY
+// ============================================================
+function populateHistoryTechFilter() {
+  const techs = [...new Set(completionHistory.map(r=>r.completed_by))].sort();
+  const sel = document.getElementById('history-tech');
+  sel.innerHTML = '<option value="">All Techs</option>' + techs.map(t=>`<option>${t}</option>`).join('');
+}
+
+function renderHistory() {
+  const search = document.getElementById('history-search').value.toLowerCase();
+  const tech = document.getElementById('history-tech').value;
+  let filtered = completionHistory.filter(r => {
+    if (tech && r.completed_by !== tech) return false;
+    if (search) { const hay=[r.task_id,r.asset_name,r.department,r.completed_by,r.notes].join(' ').toLowerCase(); if(!hay.includes(search)) return false; }
+    return true;
+  });
+  document.getElementById('history-count').textContent = filtered.length + ' records';
+  const tbody = document.getElementById('history-tbody');
+  const empty = document.getElementById('history-empty');
+  if (!filtered.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  tbody.innerHTML = filtered.slice(0,200).map(r=>`
+    <tr>
+      <td class="mono">${r.task_id}</td>
+      <td style="font-weight:500">${r.asset_name||'—'}</td>
+      <td class="mono">${r.department||'—'}</td>
+      <td class="mono">${r.completed_by||'—'}</td>
+      <td class="mono">${r.completed_date||'—'}</td>
+      <td class="mono" style="text-align:center">${r.actual_mins||'—'}${r.actual_mins&&r.est_mins?'<span style="color:var(--text3)"> / '+r.est_mins+'</span>':''}</td>
+      <td>${(r.consumables||[]).length?r.consumables.map(c=>`<span class="consumable-tag">${c}</span>`).join(''):'—'}</td>
+      <td style="color:var(--text2);font-size:12px;max-width:220px">${r.notes||'—'}</td>
+    </tr>`).join('');
+}
+
+function exportHistory() {
+  const headers = ['task_id','asset_name','department','facility','completed_by','completed_date','actual_mins','est_mins','consumables','notes'];
+  const rows = [headers.join(','), ...completionHistory.map(r=>headers.map(h=>{
+    const v = h==='consumables'?(r.consumables||[]).join('; '):((r[h]||'').toString().replace(/"/g,'""'));
+    return v.includes(',')||v.includes('"')?`"${v}"`:v;
+  }).join(','))];
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/csv'}));
+  a.download = 'stumptown_history_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+  showToast('History exported ('+completionHistory.length+' records)','success');
+}
+
+// ============================================================
+// ADMIN
+// ============================================================
+function updateSuggestBadge() {
+  const pending = suggestions.filter(s=>s.status==='pending').length;
+  const badge = document.getElementById('suggest-badge');
+  badge.textContent = pending;
+  badge.style.display = pending ? 'inline-flex' : 'none';
+}
+
+function renderAdmin() {
+  renderUserList();
+  const pending = suggestions.filter(s=>s.status==='pending');
+  const ss = document.getElementById('suggest-section');
+  if (pending.length) {
+    ss.style.display='block';
+    document.getElementById('suggest-count-badge').textContent = pending.length;
+    document.getElementById('suggestions-list').innerHTML = pending.map(s=>{
+      const isObstacle = s.type === 'Obstacle';
+      const cardStyle = isObstacle ? 'border-left:3px solid var(--red)' : '';
+      const typeStyle = isObstacle ? 'style="background:var(--red-dim);color:var(--red);border-color:#4a1818"' : '';
+      const displayBody = isObstacle ? s.body.replace(/\[OBSTACLE\] /, '') : s.body;
+      const approveLabel = isObstacle ? '✓ Acknowledged' : '✓ Approve';
+      return `
+      <div class="suggest-card" style="${cardStyle}">
+        <div class="suggest-header">
+          <span class="suggest-from">${s.from_email}</span>
+          <span class="suggest-task">${s.task_id} · ${s.asset_name}</span>
+          <span class="suggest-type" ${typeStyle}>${s.type}</span>
+          <span class="suggest-time">${fmtDateTime(s.created_at)}</span>
+        </div>
+        <div class="suggest-body">${displayBody}</div>
+        <div class="suggest-actions">
+          <button class="btn-approve" onclick="updateSuggestion('${s.id}','approved')">${approveLabel}</button>
+          <button class="btn-dismiss" onclick="updateSuggestion('${s.id}','dismissed')">Dismiss</button>
+        </div>
+      </div>`}).join('');
+  } else { ss.style.display='none'; }
+  updateSuggestBadge();
+  const search = (document.getElementById('admin-search').value||'').toLowerCase();
+  const dept = document.getElementById('admin-dept').value;
+  const fac = document.getElementById('admin-fac').value;
+  let filtered = tasks.filter(t=>{
+    if(dept&&t.department!==dept) return false;
+    if(fac&&t.facility!==fac) return false;
+    if(search){const hay=[t.id,t.asset_name,t.section,t.instruction,t.department].join(' ').toLowerCase();if(!hay.includes(search))return false;}
+    return true;
+  });
+  document.getElementById('admin-count').textContent = filtered.length+' of '+tasks.length+' tasks';
+  const badge = p=>p==='Critical'?'badge-critical':p==='Important'?'badge-important':'badge-routine';
+  document.getElementById('admin-tbody').innerHTML = filtered.map(t=>`
+    <tr data-id="${t.id}" onclick="toggleEditTask('${t.id}')">
+      <td class="mono">${t.id}</td>
+      <td class="mono">${t.facility}</td>
+      <td class="mono">${t.department}</td>
+      <td style="font-weight:500;white-space:nowrap">${t.asset_name}</td>
+      <td style="color:var(--text2)">${t.section||'—'}</td>
+      <td><span class="badge ${badge(t.priority)}">${t.priority}</span></td>
+      <td class="mono">${t.frequency}</td>
+      <td class="mono" style="color:${t.next_due&&daysUntil(t.next_due)<0?'var(--red)':'inherit'}">${fmtDate(t.next_due)}</td>
+      <td class="mono">${t.est_mins||'—'}</td>
+      <td class="instruction-cell" title="${(t.instruction||'').replace(/"/g,'&quot;')}">${t.instruction||'—'}</td>
+      <td>${t.loto==='Yes'?'<span class="loto-badge yes">LOTO</span>':'—'}</td>
+      <td style="font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.manual_url?`<a href="${t.manual_url}" target="_blank" style="color:var(--blue);text-decoration:none" title="${t.manual_url}" onclick="event.stopPropagation()">📄 Link</a>`:'—'}</td>
+      <td class="actions-cell" style="white-space:nowrap" onclick="event.stopPropagation()">
+        <button class="btn-icon edit-icon" onclick="toggleEditTask('${t.id}')" title="Edit">✏️</button>
+        <button class="btn-icon del" onclick="deleteTask('${t.id}')" title="Delete">🗑</button>
+      </td>
+    </tr>`).join('');
+}
+
+async function updateSuggestion(id, status) {
+  try {
+    if (!id.startsWith('temp-')) {
+      await supaFetch('/suggestions?id=eq.'+id, { method:'PATCH', prefer:'return=minimal', body: JSON.stringify({status}) });
+    }
+    const idx = suggestions.findIndex(s=>s.id==id);
+    if(idx>=0) suggestions[idx].status=status;
+    showToast(status==='approved'?'Suggestion approved':'Suggestion dismissed', status==='approved'?'success':'info');
+    renderAdmin();
+  } catch(e) { showToast('Update failed: '+e.message,'error'); }
+}
+
+let editingTaskId = null;
+function toggleEditTask(id) {
+  if (editingTaskId === id) {
+    // Already editing this row — close it by re-rendering
+    editingTaskId = null;
+    renderAdmin();
+    return;
+  }
+  // Close any previously editing row first
+  if (editingTaskId) {
+    editingTaskId = null;
+    renderAdmin();
+  }
+  editingTaskId = id;
+  const t = tasks.find(t=>t.id===id); if(!t) return;
+  const row = document.querySelector(`[data-id="${id}"]`); if(!row) return;
+  row.classList.add('editing');
+  const cells = row.querySelectorAll('td');
+  cells[1].innerHTML=`<select class="inline-select" onchange="updateTaskField('${id}','facility',this.value)" onclick="event.stopPropagation()">${['HQ','Creek'].map(f=>`<option ${t.facility===f?'selected':''}>${f}</option>`).join('')}</select>`;
+  cells[2].innerHTML=`<select class="inline-select" onchange="updateTaskField('${id}','department',this.value)" onclick="event.stopPropagation()">${['R','GH','P','F','CB','L','S','Maintenance'].map(d=>`<option ${t.department===d?'selected':''}>${d}</option>`).join('')}</select>`;
+  cells[3].innerHTML=`<input class="inline-edit" value="${(t.asset_name||'').replace(/"/g,'&quot;')}" onchange="updateTaskField('${id}','asset_name',this.value)" onclick="event.stopPropagation()" style="min-width:140px">`;
+  cells[4].innerHTML=`<input class="inline-edit" value="${(t.section||'').replace(/"/g,'&quot;')}" onchange="updateTaskField('${id}','section',this.value)" onclick="event.stopPropagation()" style="min-width:100px">`;
+  cells[5].innerHTML=`<select class="inline-select" onchange="updateTaskField('${id}','priority',this.value)" onclick="event.stopPropagation()">${['Critical','Important','Routine'].map(p=>`<option ${t.priority===p?'selected':''}>${p}</option>`).join('')}</select>`;
+  cells[6].innerHTML=`<select class="inline-select" onchange="updateTaskField('${id}','frequency',this.value)" onclick="event.stopPropagation()">${['Daily','Weekly','Monthly','Quarterly','Bi-Annual','Annual','2-Year','5-Year','As-Needed'].map(f=>`<option ${t.frequency===f?'selected':''}>${f}</option>`).join('')}</select>`;
+  cells[8].innerHTML=`<input class="inline-edit" type="number" value="${t.est_mins||''}" onchange="updateTaskField('${id}','est_mins',this.value)" onclick="event.stopPropagation()" style="width:55px">`;
+  cells[9].innerHTML=`<input class="inline-edit" value="${(t.instruction||'').replace(/"/g,'&quot;')}" onchange="updateTaskField('${id}','instruction',this.value)" onclick="event.stopPropagation()" style="min-width:260px">`;
+  cells[10].innerHTML=`<select class="inline-select" onchange="updateTaskField('${id}','loto',this.value)" onclick="event.stopPropagation()"><option value="" ${t.loto!=='Yes'?'selected':''}>No</option><option value="Yes" ${t.loto==='Yes'?'selected':''}>Yes</option></select>`;
+  cells[11].innerHTML=`<input class="inline-edit" value="${(t.manual_url||'').replace(/"/g,'&quot;')}" onchange="updateTaskField('${id}','manual_url',this.value)" onclick="event.stopPropagation()" placeholder="Paste URL…" style="min-width:140px">`;
+}
+
+async function updateTaskField(id, field, value) {
+  try {
+    await supaFetch('/tasks?id=eq.'+encodeURIComponent(id), { method:'PATCH', prefer:'return=minimal', body: JSON.stringify({[field]:value}) });
+    const t=tasks.find(t=>t.id===id); if(t){t[field]=value;}
+    showToast('Updated '+id,'success');
+  } catch(e) { showToast('Update failed: '+e.message,'error'); }
+}
+
+async function deleteTask(id) {
+  if(!confirm('Delete '+id+'? Cannot be undone.')) return;
+  try {
+    await supaFetch('/tasks?id=eq.'+encodeURIComponent(id), { method:'DELETE', prefer:'return=minimal' });
+    tasks=tasks.filter(t=>t.id!==id);
+    showToast('Deleted '+id,'success'); renderAdmin(); renderDashboard();
+  } catch(e) { showToast('Delete failed: '+e.message,'error'); }
+}
+
+function getNextPmId() {
+  let maxNum = 0;
+  tasks.forEach(t => {
+    const m = (t.id||'').match(/^PM-(\d+)/i);
+    if (m) { const n = parseInt(m[1]); if (n > maxNum) maxNum = n; }
+  });
+  const next = maxNum + 1;
+  return 'PM-' + String(next).padStart(String(maxNum).length, '0');
+}
+
+function toggleAddForm(){
+  const form = document.getElementById('add-form');
+  form.classList.toggle('open');
+  if (form.classList.contains('open')) {
+    document.getElementById('nf-id').value = getNextPmId();
+  }
+}
+
+async function submitAddForm(){
+  const get=id=>document.getElementById(id).value.trim();
+  const lastDate = get('nf-last');
+  const freq = get('nf-freq');
+  const nt={
+    id:get('nf-id')||getNextPmId(),
+    facility:get('nf-facility'),department:get('nf-dept'),
+    asset_name:get('nf-asset'),section:get('nf-section'),component:get('nf-component'),
+    instruction:get('nf-instruction'),frequency:freq,priority:get('nf-priority'),
+    est_mins:get('nf-mins'),loto:get('nf-loto'),
+    manual_url:get('nf-manual-url')||null,
+    last_completed:lastDate||null,
+    next_due:calcNextDue(lastDate,freq)||null,energy:''
+  };
+  if(!nt.asset_name||!nt.instruction){showToast('Asset and instruction required','error');return;}
+  try {
+    const res = await supaFetch('/tasks', { method:'POST', body: JSON.stringify(nt) });
+    tasks.push(res?res[0]:nt);
+    showToast('Added '+nt.id,'success'); toggleAddForm(); renderAdmin(); renderDashboard(); applyFilters();
+  } catch(e) { showToast('Add failed: '+e.message,'error'); }
+}
+
+function exportCSV(){
+  const headers=['id','facility','department','asset_name','section','component','instruction','frequency','priority','last_completed','next_due','loto','energy','est_mins','manual_url'];
+  const rows=[headers.join(','),...tasks.map(t=>headers.map(h=>{const v=(t[h]||'').toString().replace(/"/g,'""');return v.includes(',')||v.includes('"')?`"${v}"`:v;}).join(','))];
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/csv'}));a.download='stumptown_pm_export_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+  showToast('CSV exported ('+tasks.length+' tasks)','success');
+}
+
+// ============================================================
+// OBSTACLE MODAL
+// ============================================================
+let pendingObstacleId = null;
+
+function openObstacleModal(id) {
+  const t = tasks.find(x=>x.id===id); if(!t) return;
+  pendingObstacleId = id;
+  document.getElementById('obstacle-task-id').textContent = id + ' · ' + t.asset_name;
+  document.getElementById('obstacle-instruction').textContent = t.instruction || '';
+  document.getElementById('obstacle-reason').value = 'Schedule Change';
+  document.getElementById('obstacle-dept').value = '';
+  document.getElementById('obstacle-body').value = '';
+  document.getElementById('obstacle-modal').classList.add('open');
+}
+
+async function submitObstacle() {
+  const id = pendingObstacleId; if(!id) return;
+  const t = tasks.find(x=>x.id===id);
+  const reason = document.getElementById('obstacle-reason').value;
+  const blockingDept = document.getElementById('obstacle-dept').value;
+  const body = document.getElementById('obstacle-body').value.trim();
+  if (!body) { showToast('Please describe the obstacle','error'); return; }
+  const obstacleBody = '[OBSTACLE] Reason: ' + reason + (blockingDept ? ' | Blocking Dept: ' + blockingDept : '') + ' | ' + body;
+  const rec = {
+    task_id: id,
+    asset_name: t?.asset_name||'',
+    from_email: currentUser.email,
+    type: 'Obstacle',
+    body: obstacleBody,
+    status: 'pending'
+  };
+  try {
+    await supaFetch('/suggestions', { method:'POST', body: JSON.stringify(rec) });
+    suggestions.unshift({...rec, id:'temp-'+Date.now(), created_at:new Date().toISOString()});
+    closeModal('obstacle-modal');
+    showToast('⚠ Obstacle reported for ' + id, 'info');
+    updateSuggestBadge();
+  } catch(e) {
+    showToast('Failed to submit: ' + e.message, 'error');
+  }
+}
+
+// ============================================================
+// REPORTS
+// ============================================================
+function renderReports() {
+  const deptFilter = document.getElementById('report-dept').value;
+  const periodDays = parseInt(document.getElementById('report-period').value);
+  const now = new Date();
+  const cutoff = periodDays ? new Date(now.getTime() - periodDays * 86400000) : null;
+  const periodLabel = periodDays ? 'Last ' + periodDays + ' days' : 'All time';
+  document.getElementById('report-date-range').textContent = periodLabel + ' · Generated ' + now.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+  const ft = deptFilter ? tasks.filter(t=>t.department===deptFilter) : tasks;
+  const fc = completionHistory.filter(c => {
+    if (deptFilter && c.department !== deptFilter) return false;
+    if (cutoff && new Date(c.created_at) < cutoff) return false;
+    return true;
+  });
+  const obstacles = suggestions.filter(s => {
+    if (s.type !== 'Obstacle') return false;
+    if (deptFilter) {
+      const t = tasks.find(x=>x.id===s.task_id);
+      if (t && t.department !== deptFilter) return false;
+    }
+    if (cutoff && new Date(s.created_at) < cutoff) return false;
+    return true;
+  });
+
+  renderDeptTimeReport(ft, fc, deptFilter);
+  renderLotoReport(ft, deptFilter);
+  renderObstacleReport(obstacles);
+  renderComplianceReport(ft, fc, deptFilter);
+}
+
+function renderDeptTimeReport(ft, fc, deptFilter) {
+  const depts = deptFilter ? [deptFilter] : [...new Set(ft.map(t=>t.department))].sort();
+  const rows = depts.map(d => {
+    const dt = ft.filter(t=>t.department===d);
+    const dc = fc.filter(c=>c.department===d);
+    const totalEst = dt.reduce((sum,t)=>sum+(parseInt(t.est_mins)||0),0);
+    const totalActual = dc.reduce((sum,c)=>sum+(c.actual_mins||0),0);
+    const avgActual = dc.length ? Math.round(totalActual/dc.length) : 0;
+    const taskCount = dt.length;
+    const completionCount = dc.length;
+    const lotoCount = dt.filter(t=>t.loto==='Yes').length;
+    const lotoEst = dt.filter(t=>t.loto==='Yes').reduce((sum,t)=>sum+(parseInt(t.est_mins)||0),0);
+    return { dept:d, taskCount, completionCount, totalEst, totalActual, avgActual, lotoCount, lotoEst };
+  });
+  const totals = rows.reduce((a,r)=>({
+    taskCount:a.taskCount+r.taskCount, completionCount:a.completionCount+r.completionCount,
+    totalEst:a.totalEst+r.totalEst, totalActual:a.totalActual+r.totalActual,
+    lotoCount:a.lotoCount+r.lotoCount, lotoEst:a.lotoEst+r.lotoEst
+  }),{taskCount:0,completionCount:0,totalEst:0,totalActual:0,lotoCount:0,lotoEst:0});
+
+  const fmtHrs = m => m >= 60 ? (m/60).toFixed(1)+'h' : m+'m';
+  document.getElementById('report-dept-time').innerHTML = `<table class="admin-table" style="font-size:12px">
+    <thead><tr><th>Dept</th><th>Tasks</th><th>Completions</th><th>Total Est. Time</th><th>Total Actual Time</th><th>Avg per Completion</th><th>LOTO Tasks</th><th>LOTO Est. Time</th></tr></thead>
+    <tbody>${rows.map(r=>`<tr>
+      <td style="font-weight:600">${DEPT_NAMES[r.dept]||r.dept}</td>
+      <td class="mono">${r.taskCount}</td>
+      <td class="mono">${r.completionCount}</td>
+      <td class="mono">${fmtHrs(r.totalEst)}</td>
+      <td class="mono" style="color:${r.totalActual>r.totalEst?'var(--red)':'var(--green)'}">${fmtHrs(r.totalActual)}</td>
+      <td class="mono">${r.avgActual?fmtHrs(r.avgActual):'—'}</td>
+      <td class="mono">${r.lotoCount}</td>
+      <td class="mono">${fmtHrs(r.lotoEst)}</td>
+    </tr>`).join('')}
+    <tr style="border-top:2px solid var(--border);font-weight:600">
+      <td>TOTAL</td><td class="mono">${totals.taskCount}</td><td class="mono">${totals.completionCount}</td>
+      <td class="mono">${fmtHrs(totals.totalEst)}</td><td class="mono">${fmtHrs(totals.totalActual)}</td><td></td>
+      <td class="mono">${totals.lotoCount}</td><td class="mono">${fmtHrs(totals.lotoEst)}</td>
+    </tr></tbody></table>`;
+}
+
+function renderLotoReport(ft, deptFilter) {
+  const lotoTasks = ft.filter(t=>t.loto==='Yes').sort((a,b)=>(a.department||'').localeCompare(b.department||'')||((parseInt(a.est_mins)||0)-(parseInt(b.est_mins)||0)));
+  if (!lotoTasks.length) {
+    document.getElementById('report-loto').innerHTML = '<div style="padding:12px;color:var(--text3);font-size:13px">No LOTO tasks for selected filters</div>';
+    return;
+  }
+  const badge = p=>p==='Critical'?'badge-critical':p==='Important'?'badge-important':'badge-routine';
+  document.getElementById('report-loto').innerHTML = `<table class="admin-table" style="font-size:12px">
+    <thead><tr><th>ID</th><th>Dept</th><th>Asset</th><th>Instruction</th><th>Frequency</th><th>Priority</th><th>Est. Time</th><th>Next Due</th></tr></thead>
+    <tbody>${lotoTasks.map(t=>`<tr>
+      <td class="mono">${t.id}</td>
+      <td class="mono">${t.department}</td>
+      <td style="font-weight:500;white-space:nowrap">${t.asset_name}</td>
+      <td style="color:var(--text2);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.instruction||'—'}</td>
+      <td class="mono">${t.frequency}</td>
+      <td><span class="badge ${badge(t.priority)}">${t.priority}</span></td>
+      <td class="mono">${t.est_mins?t.est_mins+'m':'—'}</td>
+      <td class="mono" style="color:${t.next_due&&daysUntil(t.next_due)<0?'var(--red)':'inherit'}">${fmtDate(t.next_due)}</td>
+    </tr>`).join('')}</tbody></table>
+    <div style="margin-top:8px;font-size:11px;color:var(--text3);font-family:var(--font-mono)">
+      ${lotoTasks.length} LOTO tasks · ${lotoTasks.reduce((s,t)=>s+(parseInt(t.est_mins)||0),0)} total est. minutes downtime required
+    </div>`;
+}
+
+function renderObstacleReport(obstacles) {
+  const badge = document.getElementById('obstacle-count-badge');
+  const pending = obstacles.filter(o=>o.status==='pending');
+  badge.textContent = pending.length;
+  badge.style.display = pending.length ? 'inline-flex' : 'none';
+
+  if (!obstacles.length) {
+    document.getElementById('report-obstacles').innerHTML = '<div style="padding:12px;color:var(--text3);font-size:13px">No obstacles reported for selected period</div>';
+    return;
+  }
+  // Parse obstacle reasons for summary
+  const reasonCounts = {};
+  const blockingDeptCounts = {};
+  obstacles.forEach(o => {
+    const rm = (o.body||'').match(/Reason: ([^|]+)/);
+    const dm = (o.body||'').match(/Blocking Dept: ([^|]+)/);
+    const reason = rm ? rm[1].trim() : 'Unknown';
+    const dept = dm ? dm[1].trim() : '';
+    reasonCounts[reason] = (reasonCounts[reason]||0) + 1;
+    if (dept) blockingDeptCounts[dept] = (blockingDeptCounts[dept]||0) + 1;
+  });
+
+  const summaryHtml = `<div style="display:flex;gap:20px;margin-bottom:12px;flex-wrap:wrap">
+    <div style="font-size:12px"><span style="color:var(--text3)">By Reason:</span> ${Object.entries(reasonCounts).map(([r,c])=>
+      `<span style="margin-left:8px;color:var(--text)">${r} <span class="mono" style="color:var(--red)">(${c})</span></span>`).join('')}</div>
+    ${Object.keys(blockingDeptCounts).length ? `<div style="font-size:12px"><span style="color:var(--text3)">By Blocking Dept:</span> ${Object.entries(blockingDeptCounts).map(([d,c])=>
+      `<span style="margin-left:8px;color:var(--text)">${DEPT_NAMES[d]||d} <span class="mono" style="color:var(--red)">(${c})</span></span>`).join('')}</div>` : ''}
+  </div>`;
+
+  document.getElementById('report-obstacles').innerHTML = summaryHtml + obstacles.map(o => {
+    const rm = (o.body||'').match(/Reason: ([^|]+)/);
+    const dm = (o.body||'').match(/Blocking Dept: ([^|]+)/);
+    const desc = (o.body||'').replace(/\[OBSTACLE\] Reason: [^|]+(\| Blocking Dept: [^|]+)?\| /, '');
+    const reason = rm ? rm[1].trim() : '';
+    const blockDept = dm ? dm[1].trim() : '';
+    const statusColor = o.status==='pending' ? 'var(--amber)' : o.status==='approved' ? 'var(--green)' : 'var(--text3)';
+    return `<div class="suggest-card" style="border-left:3px solid var(--red)">
+      <div class="suggest-header">
+        <span class="suggest-from">${o.from_email}</span>
+        <span class="suggest-task">${o.task_id} · ${o.asset_name}</span>
+        <span class="suggest-type" style="background:var(--red-dim);color:var(--red);border-color:#4a1818">${reason}</span>
+        ${blockDept ? `<span style="font-size:10px;color:var(--text2);font-family:var(--font-mono)">blocked by: ${DEPT_NAMES[blockDept]||blockDept}</span>` : ''}
+        <span class="suggest-time">${fmtDateTime(o.created_at)}</span>
+      </div>
+      <div class="suggest-body">${desc}</div>
+      <div style="font-size:11px;font-family:var(--font-mono);color:${statusColor}">${o.status}</div>
+      ${o.status==='pending'?`<div class="suggest-actions" style="margin-top:6px">
+        <button class="btn-approve" onclick="updateSuggestion('${o.id}','approved')">✓ Acknowledged</button>
+        <button class="btn-dismiss" onclick="updateSuggestion('${o.id}','dismissed')">Dismiss</button>
+      </div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function renderComplianceReport(ft, fc, deptFilter) {
+  const depts = deptFilter ? [deptFilter] : [...new Set(ft.map(t=>t.department))].sort();
+  const rows = depts.map(d => {
+    const dt = ft.filter(t=>t.department===d);
+    const dc = fc.filter(c=>c.department===d);
+    const total = dt.length;
+    const overdue = dt.filter(t=>t.next_due && daysUntil(t.next_due)<0).length;
+    const dueSoon = dt.filter(t=>t.next_due && daysUntil(t.next_due)>=0 && daysUntil(t.next_due)<=7).length;
+    const critical = dt.filter(t=>t.priority==='Critical').length;
+    const critOverdue = dt.filter(t=>t.priority==='Critical' && t.next_due && daysUntil(t.next_due)<0).length;
+    const compRate = total ? Math.round(((total - overdue) / total) * 100) : 100;
+    const obstacles = suggestions.filter(s=>s.type==='Obstacle'&&s.status==='pending').filter(s=>{const t=tasks.find(x=>x.id===s.task_id);return t&&t.department===d;}).length;
+    return { dept:d, total, overdue, dueSoon, critical, critOverdue, compRate, completions:dc.length, obstacles };
+  });
+
+  document.getElementById('report-compliance').innerHTML = `<table class="admin-table" style="font-size:12px">
+    <thead><tr><th>Dept</th><th>Total Tasks</th><th>Overdue</th><th>Due 7d</th><th>Critical</th><th>Crit. Overdue</th><th>Compliance %</th><th>Completions</th><th>Open Obstacles</th></tr></thead>
+    <tbody>${rows.map(r=>{
+      const compColor = r.compRate >= 90 ? 'var(--green)' : r.compRate >= 75 ? 'var(--amber-light)' : 'var(--red)';
+      return `<tr>
+      <td style="font-weight:600">${DEPT_NAMES[r.dept]||r.dept}</td>
+      <td class="mono">${r.total}</td>
+      <td class="mono" style="color:${r.overdue?'var(--red)':'var(--green)'}">${r.overdue}</td>
+      <td class="mono" style="color:${r.dueSoon?'var(--amber-light)':'inherit'}">${r.dueSoon}</td>
+      <td class="mono">${r.critical}</td>
+      <td class="mono" style="color:${r.critOverdue?'var(--red)':'var(--green)'}">${r.critOverdue}</td>
+      <td class="mono" style="color:${compColor};font-weight:600">${r.compRate}%</td>
+      <td class="mono">${r.completions}</td>
+      <td class="mono" style="color:${r.obstacles?'var(--red)':'inherit'}">${r.obstacles||'—'}</td>
+    </tr>`}).join('')}</tbody></table>`;
+}
+
+function exportReport() {
+  const deptFilter = document.getElementById('report-dept').value;
+  const ft = deptFilter ? tasks.filter(t=>t.department===deptFilter) : tasks;
+  const headers = ['department','total_tasks','overdue','critical','critical_overdue','loto_tasks','total_est_mins','compliance_pct','open_obstacles'];
+  const depts = deptFilter ? [deptFilter] : [...new Set(ft.map(t=>t.department))].sort();
+  const rows = [headers.join(','), ...depts.map(d => {
+    const dt = ft.filter(t=>t.department===d);
+    const overdue = dt.filter(t=>t.next_due && daysUntil(t.next_due)<0).length;
+    const critical = dt.filter(t=>t.priority==='Critical').length;
+    const critOD = dt.filter(t=>t.priority==='Critical'&&t.next_due&&daysUntil(t.next_due)<0).length;
+    const loto = dt.filter(t=>t.loto==='Yes').length;
+    const est = dt.reduce((s,t)=>s+(parseInt(t.est_mins)||0),0);
+    const comp = dt.length ? Math.round(((dt.length-overdue)/dt.length)*100) : 100;
+    const obs = suggestions.filter(s=>s.type==='Obstacle'&&s.status==='pending').filter(s=>{const t2=tasks.find(x=>x.id===s.task_id);return t2&&t2.department===d;}).length;
+    return [DEPT_NAMES[d]||d, dt.length, overdue, critical, critOD, loto, est, comp, obs].join(',');
+  })];
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/csv'}));
+  a.download = 'stumptown_pm_report_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+  showToast('Report exported','success');
+}
+
+// ============================================================
+// WORK ORDERS
+// ============================================================
+const WO_STATUSES = ['Open','Approved','On Hold','In Progress','Complete','Cancelled'];
+const WO_PRIORITIES = ['Critical','High','Medium','Low'];
+const WO_DEPTS = ['R','GH','P','F','CB','L','S','Maintenance'];
+const WO_VALID_TRANSITIONS = {
+  'Open': ['Approved','In Progress','Cancelled'],
+  'Approved': ['In Progress','On Hold','Cancelled'],
+  'In Progress': ['On Hold','Complete'],
+  'On Hold': ['In Progress','Cancelled'],
+  'Complete': ['Open'],
+  'Cancelled': ['Open']
+};
+let allWOs = [];
+let woHistories = {};
+let woNotes = {};
+let woFilter = 'all';
+let woSearch = '';
+let woExpanded = null;
+function woIsAdmin() { return currentUser && currentUser.role === 'Admin'; }
+function woEmail() { return currentUser ? currentUser.email : ''; }
+
+async function loadWOs() {
+  try {
+    allWOs = await supaFetch('/work_orders?select=*&order=created_at.desc');
+    const hist = await supaFetch('/wo_status_history?select=*&order=created_at.asc');
+    woHistories = {};
+    for (const h of hist) { if (!woHistories[h.wo_id]) woHistories[h.wo_id] = []; woHistories[h.wo_id].push(h); }
+    try {
+      const notes = await supaFetch('/wo_notes?select=*&order=created_at.asc');
+      woNotes = {};
+      for (const n of notes) { if (!woNotes[n.wo_id]) woNotes[n.wo_id] = []; woNotes[n.wo_id].push(n); }
+    } catch(e) { woNotes = {}; }
+    const openCount = allWOs.filter(w => w.status === 'Open').length;
+    const badge = document.getElementById('wo-badge');
+    if (openCount > 0) { badge.textContent = openCount; badge.style.display = 'inline-flex'; }
+    else { badge.style.display = 'none'; }
+  } catch(e) { console.error('WO load error:', e); }
+}
+
+// --- Advanced filter logic ---
+function getWOFiltered() {
+  let filtered = [...allWOs];
+  if (woFilter !== 'all') filtered = filtered.filter(w => w.status === woFilter);
+  if (woSearch) {
+    const s = woSearch.toLowerCase();
+    filtered = filtered.filter(w => {
+      const deptName = (DEPT_NAMES[w.department]||'').toLowerCase();
+      const assignedName = (DEPT_NAMES[w.assigned_dept]||'').toLowerCase();
+      return (w.wo_number||'').toLowerCase().includes(s)
+        || (w.asset_name||'').toLowerCase().includes(s)
+        || (w.description||'').toLowerCase().includes(s)
+        || (w.reported_by||'').toLowerCase().includes(s)
+        || deptName.includes(s) || assignedName.includes(s);
+    });
+  }
+  const fPri = document.getElementById('wo-f-priority');
+  const fDept = document.getElementById('wo-f-dept');
+  const fFac = document.getElementById('wo-f-facility');
+  const fFrom = document.getElementById('wo-f-date-from');
+  const fTo = document.getElementById('wo-f-date-to');
+  if (fPri && fPri.value) filtered = filtered.filter(w => w.priority === fPri.value);
+  if (fDept && fDept.value) filtered = filtered.filter(w => w.department === fDept.value || w.assigned_dept === fDept.value);
+  if (fFac && fFac.value) filtered = filtered.filter(w => w.facility === fFac.value);
+  if (fFrom && fFrom.value) filtered = filtered.filter(w => w.created_at && w.created_at.slice(0,10) >= fFrom.value);
+  if (fTo && fTo.value) filtered = filtered.filter(w => w.created_at && w.created_at.slice(0,10) <= fTo.value);
+  return filtered;
+}
+
+function clearWOFilters() {
+  woFilter = 'all'; woSearch = '';
+  document.querySelectorAll('.wo-pill[data-value]').forEach(p => p.classList.remove('active'));
+  const allPill = document.querySelector('.wo-pill[data-value="all"]');
+  if (allPill) allPill.classList.add('active');
+  const si = document.querySelector('.wo-search'); if (si) si.value = '';
+  ['wo-f-priority','wo-f-dept','wo-f-facility'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  ['wo-f-date-from','wo-f-date-to'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  renderWOTable();
+}
+
+// --- Main render ---
+function renderWOTable() {
+  const statsEl = document.getElementById('wo-stats');
+  const tbody = document.getElementById('wo-tbody');
+  const emptyEl = document.getElementById('wo-empty');
+  const countEl = document.getElementById('wo-count-label');
+
+  statsEl.innerHTML = `
+    <div class="wo-stat"><div class="wo-stat-num">${allWOs.length}</div><div class="wo-stat-label">Total</div></div>
+    <div class="wo-stat"><div class="wo-stat-num">${allWOs.filter(w=>w.status==='Open'||w.status==='Approved').length}</div><div class="wo-stat-label">Open</div></div>
+    <div class="wo-stat"><div class="wo-stat-num yellow">${allWOs.filter(w=>w.status==='In Progress'||w.status==='On Hold').length}</div><div class="wo-stat-label">In Progress</div></div>
+    <div class="wo-stat"><div class="wo-stat-num red">${allWOs.filter(w=>w.priority==='Critical'&&w.status!=='Complete'&&w.status!=='Cancelled').length}</div><div class="wo-stat-label">Critical</div></div>
+    <div class="wo-stat"><div class="wo-stat-num green">${allWOs.filter(w=>w.status==='Complete').length}</div><div class="wo-stat-label">Complete</div></div>`;
+
+  const filtered = getWOFiltered();
+  const isFiltered = filtered.length !== allWOs.length;
+  countEl.textContent = isFiltered
+    ? filtered.length + ' of ' + allWOs.length + ' work orders'
+    : allWOs.length + ' work orders';
+
+  if (!filtered.length) { tbody.innerHTML = ''; emptyEl.style.display = 'block'; return; }
+  emptyEl.style.display = 'none';
+
+  tbody.innerHTML = filtered.map(wo => {
+    const sc = 'wo-badge-' + wo.status.replace(/\s/g,'-');
+    const isExp = woExpanded === wo.id;
+    const hist = woHistories[wo.id] || [];
+    const notes = woNotes[wo.id] || [];
+    let detail = '';
+    if (isExp) {
+      const validNext = WO_VALID_TRANSITIONS[wo.status] || [];
+      const statusOptions = [wo.status, ...validNext];
+
+      detail = `<tr><td colspan="7"><div class="wo-detail-panel">
+        <div class="wo-detail-grid">
+          <div class="wo-detail-group"><label>Reported By</label><div class="val">${wo.reported_by} (${wo.reporter_email})</div></div>
+          <div class="wo-detail-group"><label>Facility</label><div class="val">${wo.facility}</div></div>
+          <div class="wo-detail-group" style="grid-column:1/-1"><label>Description</label><div class="val">${wo.description||''}</div></div>
+          ${wo.source_pm_id ? `<div class="wo-detail-group"><label>Source PM</label><div class="val" style="color:var(--blue)">${wo.source_pm_id}</div></div>` : ''}
+          ${woIsAdmin() ? `
+          <div class="wo-detail-group"><label>Status</label><select onchange="updateWO('${wo.id}','status',this.value,'${wo.status}')" onclick="event.stopPropagation()">${statusOptions.map(s=>`<option value="${s}" ${s===wo.status?'selected':''}>${s}</option>`).join('')}</select></div>
+          <div class="wo-detail-group"><label>Assign to Dept</label><select onchange="updateWO('${wo.id}','assigned_dept',this.value)" onclick="event.stopPropagation()"><option value="">Unassigned</option>${WO_DEPTS.map(d=>`<option value="${d}" ${d===wo.assigned_dept?'selected':''}>${DEPT_NAMES[d]||d}</option>`).join('')}</select></div>
+          <div class="wo-detail-group"><label>Priority</label><select onchange="updateWO('${wo.id}','priority',this.value)" onclick="event.stopPropagation()">${WO_PRIORITIES.map(p=>`<option value="${p}" ${p===wo.priority?'selected':''}>${p}</option>`).join('')}</select></div>
+          <div class="wo-detail-group"><label>Labor Mins</label><input type="number" value="${wo.labor_mins||''}" placeholder="0" onchange="updateWO('${wo.id}','labor_mins',this.value?parseInt(this.value):null)" onclick="event.stopPropagation()"></div>
+          <div class="wo-detail-group" style="grid-column:1/-1"><label>Resolution Notes</label><textarea onchange="updateWO('${wo.id}','resolution_notes',this.value)" onclick="event.stopPropagation()" placeholder="What was done?">${wo.resolution_notes||''}</textarea></div>
+          <div class="wo-detail-group" style="grid-column:1/-1"><label>Parts Used</label><input type="text" value="${wo.parts_used||''}" placeholder="e.g. Bearing #4520" onchange="updateWO('${wo.id}','parts_used',this.value)" onclick="event.stopPropagation()"></div>
+          ` : `
+          <div class="wo-detail-group"><label>Status</label><div class="val">${wo.status}</div></div>
+          <div class="wo-detail-group"><label>Assigned Dept</label><div class="val">${wo.assigned_dept ? (DEPT_NAMES[wo.assigned_dept]||wo.assigned_dept) : 'Unassigned'}</div></div>
+          ${wo.resolution_notes ? `<div class="wo-detail-group"><label>Resolution</label><div class="val">${wo.resolution_notes}</div></div>` : ''}
+          `}
+        </div>
+        ${woIsAdmin() && wo.status==='Open' ? `<div class="wo-actions"><button class="wo-btn-approve" onclick="event.stopPropagation();quickWOStatus('${wo.id}','Approved','Open')">✓ Approve</button><button class="wo-btn-cancel" onclick="event.stopPropagation();quickWOStatus('${wo.id}','Cancelled','Open')">✕ Cancel</button></div>` : ''}
+        ${hist.length ? `<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><label style="font-size:10px;color:var(--text3);font-family:var(--font-mono);text-transform:uppercase;display:block;margin-bottom:6px">Status History</label>${hist.map(h=>`<div class="wo-timeline-item"><div class="wo-timeline-dot"></div><div>${h.old_status?h.old_status+' → ':''}${h.new_status}${h.notes?' — '+h.notes:''} <span style="color:var(--text3);font-size:11px">${fmtDateTime(h.created_at)}</span></div></div>`).join('')}</div>` : ''}
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+          <label style="font-size:10px;color:var(--text3);font-family:var(--font-mono);text-transform:uppercase;display:block;margin-bottom:8px">Notes & Updates</label>
+          ${notes.length ? notes.map(n=>`<div class="wo-note"><div class="wo-note-hdr"><span class="wo-note-author">${n.author}</span>${n.status_change?'<span class="wo-note-status">→ '+n.status_change+'</span>':''}<span class="wo-note-time">${fmtDateTime(n.created_at)}</span></div><div class="wo-note-body">${n.body}</div></div>`).join('') : '<p style="color:var(--text3);font-size:13px;margin-bottom:10px">No notes yet.</p>'}
+          <textarea id="wo-note-${wo.id}" placeholder="Add a note or update..." rows="2" style="width:100%;padding:8px;background:var(--bg4);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:13px;margin-bottom:6px;resize:vertical;" onclick="event.stopPropagation()"></textarea>
+          <div style="display:flex;gap:8px;align-items:center;" onclick="event.stopPropagation()">
+            ${woIsAdmin() ? `<select id="wo-ns-${wo.id}" style="padding:5px 8px;background:var(--bg4);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;">
+              <option value="">No status change</option>${(WO_VALID_TRANSITIONS[wo.status]||[]).map(s=>`<option value="${s}">${s}</option>`).join('')}
+            </select>` : ''}
+            <button class="btn-primary" style="padding:5px 12px;font-size:11px" onclick="addWONote('${wo.id}')">Add Note</button>
+          </div>
+        </div>
+      </div></td></tr>`;
+    }
+    return `<tr class="${isExp?'wo-expanded':''}" onclick="woExpanded=woExpanded==='${wo.id}'?null:'${wo.id}';renderWOTable()">
+      <td><span class="wo-num">${wo.wo_number}</span></td>
+      <td><span class="wo-pri-${wo.priority}">${wo.priority}</span></td>
+      <td><span class="wo-badge ${sc}">${wo.status}</span></td>
+      <td class="wo-desc-cell">${wo.asset_name}</td>
+      <td>${DEPT_NAMES[wo.department]||wo.department}</td>
+      <td>${wo.assigned_dept?(DEPT_NAMES[wo.assigned_dept]||wo.assigned_dept):'—'}</td>
+      <td style="white-space:nowrap">${fmtDateTime(wo.created_at).split(',')[0]}</td>
+    </tr>${detail}`;
+  }).join('');
+}
+
+function setWOFilter(el) {
+  document.querySelectorAll('.wo-pill[data-value]').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  woFilter = el.dataset.value;
+  renderWOTable();
+}
+
+async function updateWO(woId, field, value, oldValue) {
+  if (!woIsAdmin()) { showToast('Admin access required','error'); return; }
+  try {
+    const body = {}; body[field] = value;
+    if (field==='status' && value==='Approved') { body.approved_by = woEmail(); body.approved_at = new Date().toISOString(); }
+    await supaFetch('/work_orders?id=eq.' + woId, { method:'PATCH', body:JSON.stringify(body) });
+    if (field==='status' && oldValue) {
+      await supaFetch('/wo_status_history', { method:'POST', body:JSON.stringify({ wo_id:woId, old_status:oldValue, new_status:value, changed_by:woEmail(), notes:value==='Approved'?'Approved by '+woEmail():null })});
+    }
+    const fieldLabel = {status:'Status',assigned_dept:'Assignment',priority:'Priority',labor_mins:'Labor mins',resolution_notes:'Resolution',parts_used:'Parts'}[field] || field;
+    showToast(fieldLabel + ' updated','success');
+    await loadWOs(); woExpanded = woId; renderWOTable();
+  } catch(e) { showToast('Error updating ' + field + ': ' + e.message,'error'); }
+}
+
+async function quickWOStatus(woId, newStatus, oldStatus) {
+  await updateWO(woId, 'status', newStatus, oldStatus);
+}
+
+async function addWONote(woId) {
+  const input = document.getElementById('wo-note-'+woId);
+  const statusSel = document.getElementById('wo-ns-'+woId);
+  const noteBody = input.value.trim();
+  const newStatus = (statusSel && woIsAdmin()) ? statusSel.value : '';
+  if (!noteBody) { showToast('Enter a note','error'); return; }
+  try {
+    await supaFetch('/wo_notes', { method:'POST', body:JSON.stringify({ wo_id:woId, author:woEmail().split('@')[0], body:noteBody, status_change:newStatus||null })});
+    if (newStatus) {
+      const wo = allWOs.find(w=>w.id===woId);
+      const old = wo ? wo.status : '';
+      const ub = { status:newStatus };
+      if (newStatus==='Approved') { ub.approved_by=woEmail(); ub.approved_at=new Date().toISOString(); }
+      await supaFetch('/work_orders?id=eq.'+woId, { method:'PATCH', body:JSON.stringify(ub) });
+      await supaFetch('/wo_status_history', { method:'POST', body:JSON.stringify({ wo_id:woId, old_status:old, new_status:newStatus, changed_by:woEmail(), notes:noteBody.substring(0,100) })});
+    }
+    showToast(newStatus ? 'Note added → '+newStatus : 'Note added','success');
+    await loadWOs(); woExpanded = woId; renderWOTable();
+  } catch(e) { showToast('Error adding note','error'); }
+}
+
+function openNewWO() { document.getElementById('wo-modal').classList.add('open'); }
+
+async function createWO() {
+  const facility = document.getElementById('wo-facility').value;
+  const dept = document.getElementById('wo-dept').value;
+  const asset = document.getElementById('wo-asset').value.trim();
+  const priority = document.getElementById('wo-priority').value;
+  const sourcePm = document.getElementById('wo-source-pm').value.trim();
+  const desc = document.getElementById('wo-desc').value.trim();
+  if (!asset || !desc) { showToast('Equipment and description required','error'); return; }
+  try {
+    const result = await supaFetch('/work_orders', { method:'POST', body:JSON.stringify({ wo_number:'', facility:facility, department:dept, asset_name:asset, description:desc, reported_by:woEmail().split('@')[0], reporter_email:woEmail(), priority:priority, status:'Open', source_pm_id:sourcePm||null })});
+    const wo = result[0];
+    await supaFetch('/wo_status_history', { method:'POST', body:JSON.stringify({ wo_id:wo.id, old_status:null, new_status:'Open', changed_by:woEmail(), notes:sourcePm?'Created from PM '+sourcePm:'Work order submitted' })});
+    closeModal('wo-modal');
+    document.getElementById('wo-facility').value = 'HQ';
+    document.getElementById('wo-dept').value = 'R';
+    document.getElementById('wo-asset').value = '';
+    document.getElementById('wo-priority').value = 'Medium';
+    document.getElementById('wo-source-pm').value = '';
+    document.getElementById('wo-desc').value = '';
+    showToast('Created '+wo.wo_number,'success');
+    await loadWOs(); renderWOTable();
+  } catch(e) { showToast('Error creating WO','error'); }
+}
+
+// ============================================================
+// USER MANAGEMENT
+// ============================================================
+function renderUserList() {
+  const el = document.getElementById('um-list');
+  if (!el) return;
+  const users = Object.values(portalUsers).sort((a,b) => {
+    const ro = {Admin:0,Lead:1,Technician:2};
+    return (ro[a.role]||9) - (ro[b.role]||9) || a.email.localeCompare(b.email);
+  });
+  if (!users.length) { el.innerHTML = '<p style="color:var(--text3);font-size:13px">No users yet.</p>'; return; }
+  const roleColors = {Admin:'var(--amber)',Lead:'var(--green)',Technician:'var(--text2)'};
+  const roleBg = {Admin:'var(--amber-dim)',Lead:'var(--green-dim)',Technician:'var(--bg3)'};
+  el.innerHTML = `<table class="wo-table" style="font-size:12px">
+    <thead><tr><th>Email</th><th>Name</th><th>Role</th><th>Department</th><th></th></tr></thead>
+    <tbody>${users.map(u => `<tr>
+      <td style="font-family:var(--font-mono);font-size:11px">${u.email}</td>
+      <td>${u.display_name || '—'}</td>
+      <td><span style="padding:2px 8px;border-radius:3px;font-family:var(--font-mono);font-size:10px;font-weight:600;background:${roleBg[u.role]};color:${roleColors[u.role]}">${u.role}</span></td>
+      <td>${u.department ? (DEPT_NAMES[u.department]||u.department) : '—'}</td>
+      <td style="white-space:nowrap">
+        <select onchange="changeUserRole('${u.id}','${u.email}',this.value)" style="padding:3px 6px;background:var(--bg4);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:11px;font-family:var(--font-mono)">
+          <option value="Technician" ${u.role==='Technician'?'selected':''}>Technician</option>
+          <option value="Lead" ${u.role==='Lead'?'selected':''}>Lead</option>
+          <option value="Admin" ${u.role==='Admin'?'selected':''}>Admin</option>
+        </select>
+        ${u.email !== currentUser.email ? `<button onclick="removePortalUser('${u.id}','${u.email}')" style="margin-left:4px;padding:3px 8px;background:var(--red-dim);color:var(--red);border:1px solid transparent;border-radius:3px;font-size:11px;cursor:pointer;font-family:var(--font-mono)">✕</button>` : ''}
+      </td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+async function addPortalUser() {
+  const email = (document.getElementById('um-email').value || '').trim().toLowerCase();
+  const name = document.getElementById('um-name').value.trim();
+  const role = document.getElementById('um-role').value;
+  const dept = document.getElementById('um-dept').value;
+  if (!email || !email.includes('@')) { showToast('Enter a valid email','error'); return; }
+  try {
+    await supaFetch('/portal_users', { method:'POST', body: JSON.stringify({
+      email: email, display_name: name || null, role: role, department: dept || null
+    })});
+    document.getElementById('um-email').value = '';
+    document.getElementById('um-name').value = '';
+    showToast('Added ' + email + ' as ' + role, 'success');
+    await loadPortalUsers();
+    renderUserList();
+  } catch(e) {
+    if (e.message && e.message.includes('duplicate')) { showToast('That email is already registered','error'); }
+    else { showToast('Error adding user','error'); console.error(e); }
+  }
+}
+
+async function changeUserRole(id, email, newRole) {
+  try {
+    await supaFetch('/portal_users?id=eq.' + id, { method:'PATCH', body: JSON.stringify({ role: newRole }) });
+    showToast(email + ' → ' + newRole, 'success');
+    await loadPortalUsers();
+    renderUserList();
+  } catch(e) { showToast('Error updating role','error'); }
+}
+
+async function removePortalUser(id, email) {
+  if (!confirm('Remove ' + email + ' from the portal?')) return;
+  try {
+    await supaFetch('/portal_users?id=eq.' + id, { method:'DELETE' });
+    showToast('Removed ' + email, 'success');
+    await loadPortalUsers();
+    renderUserList();
+  } catch(e) { showToast('Error removing user','error'); }
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(msg,type='success'){
+  const icons={success:'✓',error:'✕',info:'ℹ'};
+  const el=document.createElement('div');el.className='toast '+type;
+  el.innerHTML=`<span class="toast-icon">${icons[type]||'ℹ'}</span><span>${msg}</span>`;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(()=>el.remove(),3500);
+}
+
+// Close modals on overlay click
+['complete-modal','suggest-modal','obstacle-modal','wo-modal'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',function(e){if(e.target===this)closeModal(id);});
+});
+</script>
+</body>
+</html>
