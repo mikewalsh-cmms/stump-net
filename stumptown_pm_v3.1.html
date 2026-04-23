@@ -1132,8 +1132,12 @@ async function loadAllData() {
     completionHistory = c || [];
     suggestions = s || [];
     completedIds = new Set();
-    // Mark tasks completed based on latest completion within their interval
-    completionHistory.forEach(r => completedIds.add(r.task_id));
+    // Mark a task as "done for this cycle" only if its next_due is still in the future.
+    // This ensures weekly/monthly/quarterly tasks reset properly after each interval expires.
+    const todayStr = new Date().toISOString().slice(0,10);
+    tasks.forEach(t => {
+      if (t.next_due && t.next_due > todayStr) completedIds.add(t.id);
+    });
     setSyncState('live', 'live');
     renderDashboard(); applyFilters(); updateSuggestBadge();
     populateHistoryTechFilter();
